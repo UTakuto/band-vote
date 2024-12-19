@@ -1,4 +1,4 @@
-const SubmissionForm = () => {
+export default function SubmissionForm() {
     // const router = useRouter();
     //max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md h-full m-auto
     return (
@@ -87,6 +87,4 @@ const SubmissionForm = () => {
             </form>
         </div>
     );
-};
-
-export default SubmissionForm;
+}
