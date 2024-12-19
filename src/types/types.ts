@@ -12,3 +12,14 @@ export type Band = {
     totalAdjustedScore: number;
     averageScore: number;
 };
+
+export interface Score {
+    band: string;
+    score: number;
+}
+
+export interface FormData {
+    name: string;
+    band: string;
+    scores: Score[];
+}
