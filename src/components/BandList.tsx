@@ -1,6 +1,25 @@
+import React from "react";
 import BandCheckbox from "./BandCheckbox";
 
-export default function BandList() {
+interface Band {
+    id: string;
+    name: string;
+    // 他のプロパティがある場合はここに追加
+}
+
+interface BandListProps {
+    bands: Band[];
+    selectedBands: { [key: string]: boolean };
+    onCheckboxChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    checkboxName: string;
+}
+
+const BandList: React.FC<BandListProps> = ({
+    bands,
+    selectedBands,
+    onCheckboxChange,
+    checkboxName,
+}) => {
     return (
         <div className="w-[250px] sm:w-[350px] mb-5">
             <label
@@ -10,19 +29,20 @@ export default function BandList() {
                 出演バンド
             </label>
             <div className="w-full flex flex-col items-center justify-center">
-                <BandCheckbox
-                    id="bordered-checkbox-1"
-                    label="SEKAI NO OWARI"
-                    name="bordered-checkbox"
-                    value=""
-                />
-                <BandCheckbox
-                    id="bordered-checkbox-2"
-                    label="New Jeans"
-                    name="bordered-checkbox"
-                    value=""
-                />
+                {bands.map((band) => (
+                    <BandCheckbox
+                        key={band.id}
+                        id={band.id}
+                        label={band.name}
+                        name={checkboxName}
+                        value={band.id}
+                        checked={selectedBands[band.id] || false}
+                        onChange={onCheckboxChange}
+                    />
+                ))}
             </div>
         </div>
     );
-}
+};
+
+export default BandList;
