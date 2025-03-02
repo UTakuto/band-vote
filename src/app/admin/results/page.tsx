@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import BandTable from "@/components/BandTable";
+import BandForm from "@/components/BandForm";
 
 interface Band {
     id: string;
@@ -71,99 +73,53 @@ export default function ResultsPage() {
                     </div>
 
                     {/* 集計結果テーブル */}
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        順位
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        バンド名
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        合計点
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        平均点
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {bands.map((band) => (
-                                    <tr key={band.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {band.rank}位
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {isEditing ? (
-                                                <input
-                                                    type="text"
-                                                    value={band.name}
-                                                    onChange={(e) => {
-                                                        const newBands =
-                                                            bands.map((b) =>
-                                                                b.id === band.id
-                                                                    ? {
-                                                                          ...b,
-                                                                          name: e
-                                                                              .target
-                                                                              .value,
-                                                                      }
-                                                                    : b
-                                                            );
-                                                        setBands(newBands);
-                                                    }}
-                                                    className="border rounded px-2 py-1"
-                                                />
-                                            ) : (
-                                                band.name
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {band.score.toFixed(1)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {band.averageScore.toFixed(1)}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <BandTable
+                        bands={bands}
+                        isEditing={isEditing}
+                        setBands={setBands}
+                    />
+
+                    {/* バンド登録フォーム */}
+                    <div className="mt-8">
+                        <BandForm
+                            addBand={(newBand) =>
+                                setBands((prevBands) => [...prevBands, newBand])
+                            }
+                        />
                     </div>
 
                     {/* 操作パネル */}
                     <div className="mt-8 space-y-4">
-                        <div className="flex justify-end space-x-4">
-                            {isEditing ? (
-                                <>
-                                    <button
-                                        onClick={handleBandUpdate}
-                                        className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
-                                    >
-                                        保存
-                                    </button>
-                                    <button
-                                        onClick={() => setIsEditing(false)}
-                                        className="px-4 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700"
-                                    >
-                                        キャンセル
-                                    </button>
-                                </>
-                            ) : (
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
-                                >
-                                    バンド情報編集
-                                </button>
-                            )}
-                            <button className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700">
-                                CSVエクスポート
-                            </button>
-                            <button className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700">
-                                バンド登録
-                            </button>
+                        <div className="flex justify-between space-x-4">
+                            <div className="flex justify-end">
+                                <div>
+                                    {isEditing ? (
+                                        <>
+                                            <button
+                                                onClick={handleBandUpdate}
+                                                className="mr-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+                                            >
+                                                保存
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    setIsEditing(false)
+                                                }
+                                                className="mr-2 px-4 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700"
+                                            >
+                                                キャンセル
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="mr-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                                        >
+                                            バンド情報編集
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
