@@ -39,7 +39,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
                 {bands.map((band) => (
                     <div
                         key={band.id}
-                        className="w-full flex justify-between items-center gap-x-3"
+                        className="w-full flex justify-between items-center gap-x-3 py-2 border-b border-gray-200 dark:border-gray-300"
                     >
                         <div>
                             <span className="block font-medium text-sm text-gray-800 dark:text-[#212121]">
