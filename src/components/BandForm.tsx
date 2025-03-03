@@ -1,14 +1,7 @@
 import React, { useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
-interface Band {
-    id: string;
-    name: string;
-    score: number;
-    averageScore: number;
-    rank: number;
-}
+import { Band } from "@/types/types";
 
 interface BandFormProps {
     addBand: (band: Band) => void;
@@ -48,18 +41,18 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex space-x-4">
+        <form onSubmit={handleSubmit} className="flex justify-center items-center space-x-4">
             <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="バンド名"
-                className="border rounded px-2 py-1"
+                className="border rounded h-[40px]"
                 required
             />
             <button
                 type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                className="w-[60px] h-[40px] bg-gray-700 text-[#fefefe] rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
             >
                 登録
             </button>
