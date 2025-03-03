@@ -3,14 +3,7 @@ import React, { useEffect, useState } from "react";
 import UserNameBox from "./UserNameBox";
 import BandList from "./BandList";
 import BandScoreList from "./BandScoreList";
-
-interface Band {
-    id: string;
-    name: string;
-    score: number;
-    averageScore: number;
-    rank: number;
-}
+import { Band } from "@/types/types";
 
 export default function SubmissionForm() {
     const [bands, setBands] = useState<Band[]>([]);
@@ -37,9 +30,7 @@ export default function SubmissionForm() {
         fetchBands();
     }, []);
 
-    const handleCheckboxChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
+    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, checked } = event.target;
         setSelectedBands((prevSelectedBands) => ({
             ...prevSelectedBands,
@@ -68,7 +59,8 @@ export default function SubmissionForm() {
 
             <button
                 type="submit"
-                className="w-[120px] sm:w-[180px] bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 mt-4"
+                className="w-[120px] sm:w-[180px] bg-gray-700 text-white py-2 rounded-md 
+                transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg mt-4"
             >
                 投票
             </button>
