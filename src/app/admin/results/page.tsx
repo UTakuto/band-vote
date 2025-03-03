@@ -1,24 +1,20 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import BandTable from "@/components/BandTable";
 import BandForm from "@/components/BandForm";
-
-interface Band {
-    id: string;
-    name: string;
-    score: number;
-    averageScore: number;
-    rank: number;
-}
+import VoteHistoryTable from "@/components/VoteHistoryTable";
+import { Band, Vote } from "@/types/types";
 
 export default function ResultsPage() {
     const [isVotingOpen, setIsVotingOpen] = useState(true);
     const [bands, setBands] = useState<Band[]>([]);
+    const [votes, setVotes] = useState<Vote[]>([]);
     const [isEditing, setIsEditing] = useState(false);
+    const [showBandForm, setShowBandForm] = useState(false);
 
     useEffect(() => {
         fetchBands();
+        fetchVotes();
     }, []);
 
     const fetchBands = async () => {
@@ -44,15 +40,25 @@ export default function ResultsPage() {
         }
     };
 
+    const fetchVotes = async () => {
+        try {
+            const response = await fetch("/admin/api/votes");
+            const data = await response.json();
+            if (data.votes) {
+                setVotes(data.votes);
+            }
+        } catch (error) {
+            console.error("投票履歴の取得に失敗しました:", error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="bg-[#fefefe] rounded-lg shadow-lg p-6">
                     {/* ヘッダー部分 */}
                     <div className="flex justify-between items-center mb-8">
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            採点結果管理画面
-                        </h1>
+                        <h1 className="text-2xl font-bold text-gray-900">採点結果管理画面</h1>
                         <div className="space-x-4">
                             <button
                                 onClick={() => setIsVotingOpen(!isVotingOpen)}
@@ -62,9 +68,7 @@ export default function ResultsPage() {
                                         : "bg-green-600 text-white hover:bg-green-700"
                                 }`}
                             >
-                                {isVotingOpen
-                                    ? "投票を締め切る"
-                                    : "投票を再開する"}
+                                {isVotingOpen ? "投票を締め切る" : "投票を再開する"}
                             </button>
                             <button className="px-4 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700">
                                 結果をリセット
@@ -73,26 +77,29 @@ export default function ResultsPage() {
                     </div>
 
                     {/* 集計結果テーブル */}
-                    <BandTable
-                        bands={bands}
-                        isEditing={isEditing}
-                        setBands={setBands}
-                    />
-
-                    {/* バンド登録フォーム */}
-                    <div className="mt-8">
-                        <BandForm
-                            addBand={(newBand) =>
-                                setBands((prevBands) => [...prevBands, newBand])
-                            }
-                        />
-                    </div>
+                    <BandTable bands={bands} isEditing={isEditing} setBands={setBands} />
 
                     {/* 操作パネル */}
                     <div className="mt-8 space-y-4">
                         <div className="flex justify-between space-x-4">
                             <div className="flex justify-end">
-                                <div>
+                                <div className="flex justify-center items-center space-x-4">
+                                    {/* バンド登録フォーム */}
+                                    <div className="flex justify-center items-center space-x-4">
+                                        {showBandForm && (
+                                            <BandForm
+                                                addBand={(newBand) =>
+                                                    setBands((prevBands) => [...prevBands, newBand])
+                                                }
+                                            />
+                                        )}
+                                        <button
+                                            onClick={() => setShowBandForm(!showBandForm)}
+                                            className="w-[120px] sm:w-[180px] bg-gray-700 text-white py-2 rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
+                                        >
+                                            {showBandForm ? "フォームを閉じる" : "バンドを追加"}
+                                        </button>
+                                    </div>
                                     {isEditing ? (
                                         <>
                                             <button
@@ -102,9 +109,7 @@ export default function ResultsPage() {
                                                 保存
                                             </button>
                                             <button
-                                                onClick={() =>
-                                                    setIsEditing(false)
-                                                }
+                                                onClick={() => setIsEditing(false)}
                                                 className="mr-2 px-4 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700"
                                             >
                                                 キャンセル
@@ -113,7 +118,7 @@ export default function ResultsPage() {
                                     ) : (
                                         <button
                                             onClick={() => setIsEditing(true)}
-                                            className="mr-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                                            className="w-[120px] sm:w-[180px] h-[40px] bg-gray-700 text-white rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
                                         >
                                             バンド情報編集
                                         </button>
@@ -122,6 +127,9 @@ export default function ResultsPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* 投票履歴テーブル */}
+                    <VoteHistoryTable votes={votes} />
                 </div>
             </div>
         </div>
