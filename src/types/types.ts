@@ -6,13 +6,14 @@ export type User = {
     variable: number;
 };
 
-export type Band = {
+export interface Band {
     id: string;
     name: string;
-    totalAdjustedScore: number;
+    score: number;
     averageScore: number;
-};
-
+    rank: number;
+    totalAdjustedScore?: number; // オプショナルとして追加
+}
 export interface Score {
     band: string;
     score: number;
@@ -22,4 +23,13 @@ export interface FormData {
     name: string;
     band: string;
     scores: Score[];
+}
+
+export interface Vote {
+    id: string;
+    userName: string;
+    bandId: string;
+    bandName: string;
+    score: number;
+    createdAt: string;
 }
