@@ -1,12 +1,6 @@
 import React from "react";
 import BandCheckbox from "./BandCheckbox";
-
-interface Band {
-    id: string;
-    name: string;
-    // 他のプロパティがある場合はここに追加
-}
-
+import { Band } from "@/types/types";
 interface BandListProps {
     bands: Band[];
     selectedBands: { [key: string]: boolean };
