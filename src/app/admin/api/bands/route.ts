@@ -1,13 +1,6 @@
-import { adminDb } from "@/lib/firebase-admin";
 import { NextResponse } from "next/server";
-
-interface Band {
-    id: string;
-    name: string;
-    score: number;
-    averageScore: number;
-    rank: number;
-}
+import { adminDb } from "@/lib/firebase-admin";
+import { Band } from "@/types/types";
 
 export async function GET() {
     try {
