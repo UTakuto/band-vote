@@ -59,7 +59,7 @@ export default function SubmissionForm() {
 
             <button
                 type="submit"
-                className="w-[120px] sm:w-[180px] bg-gray-700 text-white py-2 rounded-md 
+                className="w-[120px] sm:w-[180px] bg-gray-700 text-[#fefefe] py-2 rounded-md 
                 transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg mt-4"
             >
                 投票
