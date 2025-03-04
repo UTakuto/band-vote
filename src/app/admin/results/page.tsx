@@ -59,18 +59,18 @@ export default function ResultsPage() {
                     {/* ヘッダー部分 */}
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-2xl font-bold text-gray-900">採点結果管理画面</h1>
-                        <div className="space-x-4">
+                        <div className="flex justify-center items-center space-x-4">
                             <button
                                 onClick={() => setIsVotingOpen(!isVotingOpen)}
                                 className={`px-4 py-2 rounded-md text-sm font-medium ${
                                     isVotingOpen
-                                        ? "bg-red-600 text-white hover:bg-red-700"
-                                        : "bg-green-600 text-white hover:bg-green-700"
+                                        ? "bg-red-600 text-[#fefefe] hover:bg-red-700"
+                                        : "bg-green-600 text-[#fefefe] hover:bg-green-700"
                                 }`}
                             >
                                 {isVotingOpen ? "投票を締め切る" : "投票を再開する"}
                             </button>
-                            <button className="px-4 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700">
+                            <button className="w-[120px] text-[14px] bg-gray-700 text-[#fefefe] py-2 rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg">
                                 結果をリセット
                             </button>
                         </div>
@@ -95,7 +95,7 @@ export default function ResultsPage() {
                                         )}
                                         <button
                                             onClick={() => setShowBandForm(!showBandForm)}
-                                            className="w-[120px] sm:w-[180px] bg-gray-700 text-white py-2 rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
+                                            className="w-[120px] sm:w-[180px] bg-gray-700 text-[#fefefe] py-2 rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
                                         >
                                             {showBandForm ? "フォームを閉じる" : "バンドを追加"}
                                         </button>
@@ -104,13 +104,13 @@ export default function ResultsPage() {
                                         <>
                                             <button
                                                 onClick={handleBandUpdate}
-                                                className="mr-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+                                                className="mr-2 px-4 py-2 bg-green-600 text-[#fefefe] rounded-md text-sm font-medium hover:bg-green-700"
                                             >
                                                 保存
                                             </button>
                                             <button
                                                 onClick={() => setIsEditing(false)}
-                                                className="mr-2 px-4 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700"
+                                                className="mr-2 px-4 py-2 bg-gray-600 text-[#fefefe] rounded-md text-sm font-medium hover:bg-gray-700"
                                             >
                                                 キャンセル
                                             </button>
@@ -118,7 +118,7 @@ export default function ResultsPage() {
                                     ) : (
                                         <button
                                             onClick={() => setIsEditing(true)}
-                                            className="w-[120px] sm:w-[180px] h-[40px] bg-gray-700 text-white rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
+                                            className="w-[120px] sm:w-[180px] h-[40px] bg-gray-700 text-[#fefefe] rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
                                         >
                                             バンド情報編集
                                         </button>
