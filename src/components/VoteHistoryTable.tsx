@@ -4,7 +4,7 @@ export default function VoteHistoryTable({ votes }: { votes: Vote[] }) {
     return (
         <div className="mt-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4">投票履歴</h2>
-            <div className="overflow-x-auto">
+            <div className="">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
@@ -22,19 +22,19 @@ export default function VoteHistoryTable({ votes }: { votes: Vote[] }) {
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-[#fefefe] divide-y divide-gray-200">
                         {votes.map((vote) => (
                             <tr key={vote.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td className="px-6 py-4 [#fefefe]space-nowrap text-sm text-gray-900">
                                     {vote.userName}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td className="px-6 py-4 [#fefefe]space-nowrap text-sm text-gray-900">
                                     {vote.bandName}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td className="px-6 py-4 [#fefefe]space-nowrap text-sm text-gray-900">
                                     {vote.score}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td className="px-6 py-4 [#fefefe]space-nowrap text-sm text-gray-900">
                                     {new Date(vote.createdAt).toLocaleString()}
                                 </td>
                             </tr>
