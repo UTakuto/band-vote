@@ -1,12 +1,5 @@
 import React from "react";
-
-interface Band {
-    id: string;
-    name: string;
-    score: number;
-    averageScore: number;
-    rank: number;
-}
+import { Band } from "@/types/types";
 
 interface BandTableProps {
     bands: Band[];
@@ -14,11 +7,7 @@ interface BandTableProps {
     setBands: React.Dispatch<React.SetStateAction<Band[]>>;
 }
 
-const BandTable: React.FC<BandTableProps> = ({
-    bands,
-    isEditing,
-    setBands,
-}) => {
+const BandTable: React.FC<BandTableProps> = ({ bands, isEditing, setBands }) => {
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -38,13 +27,13 @@ const BandTable: React.FC<BandTableProps> = ({
                         </th>
                     </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-[#fefefe] divide-y divide-gray-200">
                     {bands.map((band) => (
                         <tr key={band.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="px-6 py-4 [#fefefe]space-nowrap text-sm font-medium text-gray-900">
                                 {band.rank}位
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-6 py-4 [#fefefe]space-nowrap text-sm text-gray-900">
                                 {isEditing ? (
                                     <input
                                         type="text"
@@ -66,17 +55,13 @@ const BandTable: React.FC<BandTableProps> = ({
                                     band.name
                                 )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {(band.score !== undefined
-                                    ? band.score
-                                    : 0
-                                ).toFixed(1)}
+                            <td className="px-6 py-4 [#fefefe]space-nowrap text-sm text-gray-900">
+                                {(band.score !== undefined ? band.score : 0).toFixed(1)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {(band.averageScore !== undefined
-                                    ? band.averageScore
-                                    : 0
-                                ).toFixed(1)}
+                            <td className="px-6 py-4 [#fefefe]space-nowrap text-sm text-gray-900">
+                                {(band.averageScore !== undefined ? band.averageScore : 0).toFixed(
+                                    1
+                                )}
                             </td>
                         </tr>
                     ))}
