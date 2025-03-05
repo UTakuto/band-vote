@@ -1,30 +1,48 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BandScoreListProps } from "@/types/types";
 
-const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
+const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onScoresChange }) => {
     // バンドIDをキーとしたスコアの状態管理
-    const [scores, setScores] = useState<{ [key: string]: number }>(
-        bands.reduce(
+    const [scores, setScores] = useState<{ [key: string]: number }>({});
+    const maxScore = 10; // 最大スコアを定義
+
+    // バンドリストが変更されたときにスコアを初期化
+    useEffect(() => {
+        const initialScores = bands.reduce(
             (acc, band) => ({
                 ...acc,
                 [band.id]: 0,
             }),
             {}
-        )
-    );
+        );
+        setScores(initialScores);
+    }, [bands]);
+
+    useEffect(() => {
+        onScoresChange(scores);
+    }, [scores, onScoresChange]);
 
     const handleIncrement = (bandId: string) => {
-        setScores((prev) => ({
-            ...prev,
-            [bandId]: prev[bandId] + 1,
-        }));
+        if (selectedBands[bandId]) return;
+        setScores((prev) => {
+            const currentScore = prev[bandId] || 0;
+            // 最大値のチェック
+            if (currentScore >= maxScore) {
+                return prev;
+            }
+            return {
+                ...prev,
+                [bandId]: currentScore + 1,
+            };
+        });
     };
 
     const handleDecrement = (bandId: string) => {
+        if (selectedBands[bandId]) return;
         setScores((prev) => ({
             ...prev,
-            [bandId]: prev[bandId] > 0 ? prev[bandId] - 1 : 0,
+            [bandId]: Math.max((prev[bandId] || 0) - 1, 0),
         }));
     };
 
@@ -36,11 +54,12 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
             >
                 バンドの点数を記入してください
             </label>
-            <div className="py-2 px-3 mt-1 p-2 border border-gray-300 rounded-md dark:text-[#212121] dark:bg-[#fefefe]">
+            <div className="pb-2 px-3 mt-1 p-2 border border-gray-300 rounded-md dark:text-[#212121] dark:bg-[#fefefe]">
                 {bands.map((band) => (
                     <div
                         key={band.id}
-                        className="w-full flex justify-between items-center gap-x-3 py-2 border-b border-gray-200 dark:border-gray-300"
+                        className={`w-full flex justify-between items-center gap-x-3 py-3 border-b border-gray-200 dark:border-gray-300 
+                        ${selectedBands[band.id] ? "opacity-50" : ""}`}
                     >
                         <div>
                             <span className="block font-medium text-sm text-gray-800 dark:text-[#212121]">
@@ -52,6 +71,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
                                 type="button"
                                 className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none dark:border-gray-300"
                                 onClick={() => handleDecrement(band.id)}
+                                disabled={selectedBands[band.id]}
                                 aria-label="Decrease"
                             >
                                 <svg
@@ -73,13 +93,14 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
                                 className="p-0 w-[30px] bg-transparent border-0 text-gray-800 text-center focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:text-[#212121]"
                                 style={{ MozAppearance: "textfield" }}
                                 type="number"
-                                value={scores[band.id]}
+                                value={scores[band.id] || 0}
                                 readOnly
                             />
                             <button
                                 type="button"
                                 className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none dark:border-gray-300"
                                 onClick={() => handleIncrement(band.id)}
+                                disabled={selectedBands[band.id]}
                                 aria-label="Increase"
                             >
                                 <svg
