@@ -1,27 +1,31 @@
 "use client";
 import { useState } from "react";
-
-interface Band {
-    id: string;
-    name: string;
-    score: number;
-    averageScore: number;
-    rank: number;
-}
-
-interface BandScoreListProps {
-    bands: Band[];
-}
+import { BandScoreListProps } from "@/types/types";
 
 const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
-    const [value, setValue] = useState(0);
+    // バンドIDをキーとしたスコアの状態管理
+    const [scores, setScores] = useState<{ [key: string]: number }>(
+        bands.reduce(
+            (acc, band) => ({
+                ...acc,
+                [band.id]: 0,
+            }),
+            {}
+        )
+    );
 
-    const handleIncrement = () => {
-        setValue((prevValue) => prevValue + 1);
+    const handleIncrement = (bandId: string) => {
+        setScores((prev) => ({
+            ...prev,
+            [bandId]: prev[bandId] + 1,
+        }));
     };
 
-    const handleDecrement = () => {
-        setValue((prevValue) => (prevValue > 0 ? prevValue - 1 : 0));
+    const handleDecrement = (bandId: string) => {
+        setScores((prev) => ({
+            ...prev,
+            [bandId]: prev[bandId] > 0 ? prev[bandId] - 1 : 0,
+        }));
     };
 
     return (
@@ -32,10 +36,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
             >
                 バンドの点数を記入してください
             </label>
-            <div
-                className="py-2 px-3 mt-1 p-2 border border-gray-300 rounded-md dark:text-[#212121] dark:bg-[#fefefe]"
-                data-hs-input-number=""
-            >
+            <div className="py-2 px-3 mt-1 p-2 border border-gray-300 rounded-md dark:text-[#212121] dark:bg-[#fefefe]">
                 {bands.map((band) => (
                     <div
                         key={band.id}
@@ -49,11 +50,9 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
                         <div className="flex items-center gap-x-1.5">
                             <button
                                 type="button"
-                                className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none  dark:border-gray-300"
-                                tabIndex={-1}
+                                className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none dark:border-gray-300"
+                                onClick={() => handleDecrement(band.id)}
                                 aria-label="Decrease"
-                                data-hs-input-number-decrement=""
-                                onClick={handleDecrement}
                             >
                                 <svg
                                     className="shrink-0 size-3.5"
@@ -74,18 +73,14 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands }) => {
                                 className="p-0 w-[30px] bg-transparent border-0 text-gray-800 text-center focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:text-[#212121]"
                                 style={{ MozAppearance: "textfield" }}
                                 type="number"
-                                aria-roledescription="Number field"
-                                value={value}
+                                value={scores[band.id]}
                                 readOnly
-                                data-hs-input-number-input=""
                             />
                             <button
                                 type="button"
-                                className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none  dark:border-gray-300"
-                                tabIndex={-1}
+                                className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none dark:border-gray-300"
+                                onClick={() => handleIncrement(band.id)}
                                 aria-label="Increase"
-                                data-hs-input-number-increment=""
-                                onClick={handleIncrement}
                             >
                                 <svg
                                     className="shrink-0 size-3.5"
