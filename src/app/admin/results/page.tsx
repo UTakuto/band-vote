@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import BandTable from "@/components/BandTable";
 import BandForm from "@/components/BandForm";
-import VoteHistoryTable from "@/components/VoteHistoryTable";
 import { Band, Vote } from "@/types/types";
+import Header from "@/components/header";
 
 export default function ResultsPage() {
     const [isVotingOpen, setIsVotingOpen] = useState(true);
@@ -15,6 +15,7 @@ export default function ResultsPage() {
     useEffect(() => {
         fetchBands();
         fetchVotes();
+        fetchVotingStatus();
     }, []);
 
     const fetchBands = async () => {
@@ -52,16 +53,81 @@ export default function ResultsPage() {
         }
     };
 
+    const handleReset = async () => {
+        // 確認ダイアログを表示
+        const isConfirmed = window.confirm(
+            "本当に全ての投票結果をリセットしますか？\nこの操作は取り消せません。"
+        );
+
+        if (isConfirmed) {
+            try {
+                // バンドと投票データを削除
+                const response = await fetch("/admin/api/reset", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (response.ok) {
+                    // 成功したら画面を更新
+                    setBands([]);
+                    setVotes([]);
+                    alert("投票結果をリセットしました。");
+                } else {
+                    throw new Error("リセットに失敗しました");
+                }
+            } catch (error) {
+                console.error("リセット中にエラーが発生しました:", error);
+                alert("リセットに失敗しました。");
+            }
+        }
+    };
+
+    // 投票状態を取得する関数を追加
+    const fetchVotingStatus = async () => {
+        try {
+            const response = await fetch("/admin/api/votingStatus");
+            const data = await response.json();
+            setIsVotingOpen(data.isVotingOpen);
+        } catch (error) {
+            console.error("投票状態の取得に失敗しました:", error);
+        }
+    };
+
+    const handleVotingStatusChange = async () => {
+        try {
+            const response = await fetch("/admin/api/votingStatus", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ isVotingOpen: !isVotingOpen }),
+            });
+
+            if (response.ok) {
+                setIsVotingOpen(!isVotingOpen);
+                const message = isVotingOpen ? "投票を締め切りました" : "投票を再開しました";
+                window.confirm(message);
+            } else {
+                throw new Error("投票状態の更新に失敗しました");
+            }
+        } catch (error) {
+            console.error("投票状態の更新に失敗しました:", error);
+            window.confirm("投票状態の更新に失敗しました");
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-100">
+            <Header />
             <div className="max-w-7xl mx-auto">
                 <div className="bg-[#fefefe] rounded-lg shadow-lg p-6">
-                    {/* ヘッダー部分 */}
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-2xl font-bold text-gray-900">採点結果管理画面</h1>
                         <div className="flex justify-center items-center space-x-4">
                             <button
-                                onClick={() => setIsVotingOpen(!isVotingOpen)}
+                                onClick={handleVotingStatusChange}
                                 className={`px-4 py-2 rounded-md text-sm font-medium ${
                                     isVotingOpen
                                         ? "bg-red-600 text-[#fefefe] hover:bg-red-700"
@@ -70,7 +136,10 @@ export default function ResultsPage() {
                             >
                                 {isVotingOpen ? "投票を締め切る" : "投票を再開する"}
                             </button>
-                            <button className="w-[120px] text-[14px] bg-gray-700 text-[#fefefe] py-2 rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg">
+                            <button
+                                onClick={handleReset}
+                                className="w-[120px] text-[14px] bg-gray-700 text-[#fefefe] py-2 rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
+                            >
                                 結果をリセット
                             </button>
                         </div>
@@ -134,7 +203,7 @@ export default function ResultsPage() {
                     </div>
 
                     {/* 投票履歴テーブル */}
-                    <VoteHistoryTable votes={votes} />
+                    {/* <VoteHistoryTable votes={votes} /> */}
                 </div>
             </div>
         </div>
