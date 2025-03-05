@@ -9,14 +9,5 @@ const firebaseConfig = {
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
-
-// 設定値のログ出力（デバッグ用）
-console.log("Firebase Config:", {
-    ...firebaseConfig,
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-});
-
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app);
-
-export { db };
+export const db = getFirestore(app);
