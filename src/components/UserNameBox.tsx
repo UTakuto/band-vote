@@ -1,4 +1,9 @@
-export default function UserNameBox() {
+interface UserNameBoxProps {
+    value: string;
+    onChange: (value: string) => void;
+}
+
+export default function UserNameBox({ value, onChange }: UserNameBoxProps) {
     return (
         <div className="w-[250px] sm:w-[350px] mb-5">
             <label
@@ -11,6 +16,8 @@ export default function UserNameBox() {
                 id="name"
                 name="name"
                 type="text"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
                 placeholder="OMU たろう"
                 className="mt-1 p-2 border border-gray-300 rounded-md w-full dark:text-[#212121]"
                 required
