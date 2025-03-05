@@ -77,7 +77,12 @@ export default function ResultsPage() {
                     </div>
 
                     {/* 集計結果テーブル */}
-                    <BandTable bands={bands} isEditing={isEditing} setBands={setBands} />
+                    <BandTable
+                        bands={bands}
+                        votes={votes}
+                        isEditing={isEditing}
+                        setBands={setBands}
+                    />
 
                     {/* 操作パネル */}
                     <div className="mt-8 space-y-4">
