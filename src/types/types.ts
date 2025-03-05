@@ -28,12 +28,21 @@ export interface FormData {
 export interface Vote {
     id: string;
     userName: string;
-    bandId: string;
-    bandName: string;
-    score: number;
-    createdAt: string;
+    voterBandId: string;
+    voterBandName: string;
+    scores: {
+        bandId: string;
+        bandName: string;
+        score: number;
+    }[];
+    createdAt: {
+        seconds: number;
+        nanoseconds: number;
+    };
 }
 
 export interface BandScoreListProps {
     bands: Band[];
+    selectedBands: { [key: string]: boolean };
+    onScoresChange: (scores: { [key: string]: number }) => void;
 }
