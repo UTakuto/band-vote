@@ -15,6 +15,25 @@ export default function SubmissionForm() {
     const [scores, setScores] = useState<{ [key: string]: number }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [isVotingOpen, setIsVotingOpen] = useState(true);
+
+    useEffect(() => {
+        const checkVotingStatus = async () => {
+            try {
+                const response = await fetch("/admin/api/votingStatus");
+                const data = await response.json();
+                if (!data.isVotingOpen) {
+                    setIsVotingOpen(false);
+                    alert("投票時間が終了しました。");
+                    router.push("/"); // または適切なページにリダイレクト
+                }
+            } catch (error) {
+                console.error("投票状態の取得に失敗しました:", error);
+            }
+        };
+
+        checkVotingStatus();
+    }, [router]);
 
     useEffect(() => {
         const fetchBands = async () => {
@@ -45,6 +64,13 @@ export default function SubmissionForm() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // 投票が締め切られている場合は送信を中止
+        if (!isVotingOpen) {
+            alert("投票時間が終了しました。");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -96,7 +122,7 @@ export default function SubmissionForm() {
 
                 <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !isVotingOpen}
                     className="w-[120px] sm:w-[180px] bg-gray-700 text-[#fefefe] py-2 rounded-md 
                         transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg mt-4
                         disabled:opacity-50 disabled:cursor-not-allowed"
