@@ -1,42 +1,68 @@
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { FormData } from "@/types/types";
+import { FormData, Band } from "@/types/types";
 import { useRouter } from "next/navigation";
 
 export const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>,
-
     formData: FormData,
-
     setError: React.Dispatch<React.SetStateAction<string>>,
-
-    router: ReturnType<typeof useRouter>
+    router: ReturnType<typeof useRouter>,
+    bands: Band[] // bandsパラメータを追加
 ) => {
-    e.preventDefault();
-
-    if (!formData.name || !formData.band || formData.scores.length === 0) {
-        setError("すべての項目を入力してください。");
-        return;
-    }
-
-    // 自分のバンドを採点しないチェック
-    if (formData.scores.some((score) => score.band === formData.band)) {
-        setError("自分の出演バンドに点数をつけることはできません。");
-        return;
-    }
-
     try {
-        // Firestoreに投票データを送信
-        await addDoc(collection(db, "users"), {
-            name: formData.name,
-            band: formData.band,
-            scores: formData.scores,
-        });
+        // バリデーションチェック
+        if (!formData.name.trim()) {
+            setError("名前を入力してください。");
+            return;
+        }
+
+        if (!formData.band) {
+            setError("所属バンドを選択してください。");
+            return;
+        }
+
+        if (formData.scores.length === 0) {
+            setError("少なくとも1つのバンドに投票してください。");
+            return;
+        }
+
+        const votesRef = collection(db, "votes");
+
+        // 投票者のバンド情報を取得
+        const voterBand = bands.find((band) => band.id === formData.band);
+        if (!voterBand) {
+            setError("選択したバンドが見つかりません。");
+            return;
+        }
+
+        // 投票データの作成
+        const voteData = {
+            userName: formData.name.trim(),
+            voterBandId: formData.band,
+            voterBandName: voterBand.name,
+            scores: formData.scores.map((score) => {
+                const votedBand = bands.find((band) => band.id === score.band);
+                if (!votedBand) {
+                    throw new Error(`投票先のバンドが見つかりません: ${score.band}`);
+                }
+                return {
+                    bandId: score.band,
+                    bandName: votedBand.name,
+                    score: score.score,
+                };
+            }),
+            createdAt: serverTimestamp(),
+        };
+
+        await addDoc(votesRef, voteData);
 
         setError("");
         alert("投票が完了しました！");
-        router.push("/results"); // 結果ページへリダイレクト
-    } catch {
-        setError("送信中にエラーが発生しました。");
+        router.push("/admin/results");
+    } catch (error) {
+        console.error("投票エラー:", error);
+        setError("投票に失敗しました。時間をおいて再度お試しください。");
+        throw error; // エラーを再スローしてデバッグを容易にする
     }
 };
