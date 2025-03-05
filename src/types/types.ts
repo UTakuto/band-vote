@@ -33,3 +33,7 @@ export interface Vote {
     score: number;
     createdAt: string;
 }
+
+export interface BandScoreListProps {
+    bands: Band[];
+}
