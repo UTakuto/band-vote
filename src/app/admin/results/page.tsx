@@ -4,8 +4,11 @@ import BandTable from "@/components/BandTable";
 import BandForm from "@/components/BandForm";
 import { Band, Vote } from "@/types/types";
 import Header from "@/components/header";
+import { useAdmin } from "@/hooks/useAdmin";
+import Loading from "@/components/Loading";
 
 export default function ResultsPage() {
+    const { isAdmin, loading } = useAdmin();
     const [isVotingOpen, setIsVotingOpen] = useState(true);
     const [bands, setBands] = useState<Band[]>([]);
     const [votes, setVotes] = useState<Vote[]>([]);
@@ -13,10 +16,20 @@ export default function ResultsPage() {
     const [showBandForm, setShowBandForm] = useState(false);
 
     useEffect(() => {
-        fetchBands();
-        fetchVotes();
-        fetchVotingStatus();
-    }, []);
+        if (isAdmin) {
+            fetchBands();
+            fetchVotes();
+            fetchVotingStatus();
+        }
+    }, [isAdmin]);
+
+    if (loading) {
+        return <Loading />;
+    }
+
+    if (!isAdmin) {
+        return null;
+    }
 
     const fetchBands = async () => {
         const response = await fetch("/admin/api/bands");
@@ -88,7 +101,11 @@ export default function ResultsPage() {
     const fetchVotingStatus = async () => {
         try {
             const response = await fetch("/admin/api/votingStatus");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
+            console.log("Fetched voting status:", data); // デバッグ用
             setIsVotingOpen(data.isVotingOpen);
         } catch (error) {
             console.error("投票状態の取得に失敗しました:", error);
@@ -97,24 +114,27 @@ export default function ResultsPage() {
 
     const handleVotingStatusChange = async () => {
         try {
+            const newStatus = !isVotingOpen;
             const response = await fetch("/admin/api/votingStatus", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ isVotingOpen: !isVotingOpen }),
+                body: JSON.stringify({ isVotingOpen: newStatus }),
             });
 
-            if (response.ok) {
-                setIsVotingOpen(!isVotingOpen);
-                const message = isVotingOpen ? "投票を締め切りました" : "投票を再開しました";
-                window.confirm(message);
-            } else {
-                throw new Error("投票状態の更新に失敗しました");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setIsVotingOpen(newStatus);
+                alert(newStatus ? "投票を再開しました" : "投票を締め切りました");
             }
         } catch (error) {
             console.error("投票状態の更新に失敗しました:", error);
-            window.confirm("投票状態の更新に失敗しました");
+            alert("投票状態の更新に失敗しました");
         }
     };
 
