@@ -42,7 +42,7 @@ export default function VoteHistoryTable({ votes }: { votes: Vote[] }) {
                                     {vote.voterBandName}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-900">
-                                    <div className="max-h-[120px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                                    <div className="max-h-[150px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                             {vote.scores.map((score, index) => (
                                                 <div
