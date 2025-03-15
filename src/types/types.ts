@@ -13,6 +13,7 @@ export interface Band {
     averageScore: number;
     rank: number;
     totalAdjustedScore?: number; // オプショナルとして追加
+    order?: number;
 }
 export interface Score {
     band: string;
@@ -45,4 +46,11 @@ export interface BandScoreListProps {
     bands: Band[];
     selectedBands: { [key: string]: boolean };
     onScoresChange: (scores: { [key: string]: number }) => void;
+}
+
+export interface BandTableProps {
+    bands: Band[];
+    votes: Vote[];
+    isEditing: boolean;
+    setBands: React.Dispatch<React.SetStateAction<Band[]>>;
 }
