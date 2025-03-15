@@ -1,22 +1,20 @@
 import * as admin from "firebase-admin";
+import { getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
-if (!admin.apps.length) {
-    try {
-        const serviceAccount = {
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-        };
+// Firebase Admin の初期化（シングルトンパターン）
+const app = !getApps().length
+    ? initializeApp({
+          credential: admin.credential.cert({
+              projectId: process.env.FIREBASE_PROJECT_ID,
+              clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+              privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+          }),
+      })
+    : getApps()[0];
 
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-        });
-
-        console.log("Firebase Admin initialized successfully");
-    } catch (error) {
-        console.error("Firebase Admin initialization error:", error);
-        throw new Error("Firebase Admin initialization failed");
-    }
-}
-
-export const adminDb = admin.firestore();
+// Admin SDKのサービスをエクスポート
+export const auth = getAuth(app);
+export const adminDb = getFirestore(app);
+export default app;
