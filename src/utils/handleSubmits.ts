@@ -8,17 +8,12 @@ export const handleSubmit = async (
     formData: FormData,
     setError: React.Dispatch<React.SetStateAction<string>>,
     router: ReturnType<typeof useRouter>,
-    bands: Band[] // bandsパラメータを追加
+    bands: Band[]
 ) => {
     try {
         // バリデーションチェック
         if (!formData.name.trim()) {
             setError("名前を入力してください。");
-            return;
-        }
-
-        if (!formData.band) {
-            setError("所属バンドを選択してください。");
             return;
         }
 
@@ -29,18 +24,13 @@ export const handleSubmit = async (
 
         const votesRef = collection(db, "votes");
 
-        // 投票者のバンド情報を取得
-        const voterBand = bands.find((band) => band.id === formData.band);
-        if (!voterBand) {
-            setError("選択したバンドが見つかりません。");
-            return;
-        }
-
         // 投票データの作成
         const voteData = {
             userName: formData.name.trim(),
-            voterBandId: formData.band,
-            voterBandName: voterBand.name,
+            voterBandId: formData.band || "", // 空文字列を許容
+            voterBandName: formData.band
+                ? bands.find((band) => band.id === formData.band)?.name || ""
+                : "",
             scores: formData.scores.map((score) => {
                 const votedBand = bands.find((band) => band.id === score.band);
                 if (!votedBand) {
@@ -59,10 +49,10 @@ export const handleSubmit = async (
 
         setError("");
         alert("投票が完了しました！");
-        router.push("/admin/results");
+        router.push("/vote-complete");
     } catch (error) {
         console.error("投票エラー:", error);
         setError("投票に失敗しました。時間をおいて再度お試しください。");
-        throw error; // エラーを再スローしてデバッグを容易にする
+        throw error;
     }
 };
