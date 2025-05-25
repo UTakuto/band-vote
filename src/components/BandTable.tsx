@@ -1,35 +1,47 @@
 import React, { useEffect, useRef } from "react";
 import { BandTableProps } from "@/types/types";
+import { calculateVariable } from "@/lib/scoring";
 
 const BandTable: React.FC<BandTableProps> = ({ bands, votes, isEditing, setBands }) => {
     const hasCalculated = useRef(false);
 
     useEffect(() => {
         if (!hasCalculated.current && !isEditing && votes.length > 0 && bands.length > 0) {
-            // バンドごとの平均点を計算
-            const averageScores = bands.map((band) => {
-                const bandVotes = votes.flatMap((vote) =>
-                    vote.scores.filter((score) => score.bandId === band.id)
-                );
-                if (bandVotes.length === 0) return 0;
-                const total = bandVotes.reduce((sum, score) => sum + score.score, 0);
-                return Number((total / bandVotes.length).toFixed(2));
+            console.log("========== 個人ごとの投票データ集計開始 ==========");
+            console.log("集計データ:");
+            console.log("- バンド数:", bands.length);
+            console.log("- 投票数:", votes.length);
+
+            // 個人ごとの補正値を計算
+            const variables = votes.map((vote) => {
+                const bandIds = bands.map((band) => band.id);
+                const scores = bandIds.map((id) => {
+                    const score = vote.scores.find((s) => s.bandId === id);
+                    return score ? score.score : 0;
+                });
+
+                return calculateVariable(scores, vote.voterBandId, bandIds);
             });
 
-            // 順位を計算
-            const sortedScores = [...averageScores].sort((a, b) => b - a);
-            const ranks = averageScores.map((score) => sortedScores.indexOf(score) + 1);
+            // 個人ごとの投票データを表示用に整形
+            const personalResults = votes.map((vote, voteIndex) => {
+                const scores = bands.map((band) => {
+                    const score = vote.scores.find((s) => s.bandId === band.id);
+                    return score ? score.score : 0;
+                });
 
-            // バンドの情報を更新
-            const calculatedBands = bands
-                .map((band, index) => ({
-                    ...band,
-                    averageScore: averageScores[index],
-                    rank: ranks[index],
-                }))
-                .sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
+                return {
+                    voter: vote.userName || `投票者${voteIndex + 1}`, // 投票者名（仮）
+                    scores: scores,
+                    variable: variables[voteIndex],
+                };
+            });
 
-            setBands(calculatedBands);
+            // 結果をログ出力
+            console.log("========== 個人ごとの投票データ ==========");
+            console.table(personalResults);
+            console.log("============================");
+
             hasCalculated.current = true;
         }
     }, [bands, votes, isEditing, setBands]);
@@ -40,46 +52,49 @@ const BandTable: React.FC<BandTableProps> = ({ bands, votes, isEditing, setBands
                 <thead className="bg-gray-50">
                     <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            順位
+                            投票者
                         </th>
+                        {bands.map((band) => (
+                            <th
+                                key={band.id}
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                                {band.name}
+                            </th>
+                        ))}
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            バンド名
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            平均点
+                            補正値
                         </th>
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {bands.map((band) => (
-                        <tr key={band.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {band.rank}位
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={band.name}
-                                        onChange={(e) => {
-                                            const updatedBands = bands.map((b) =>
-                                                b.id === band.id
-                                                    ? { ...b, name: e.target.value }
-                                                    : b
-                                            );
-                                            setBands(updatedBands);
-                                        }}
-                                        className="w-full px-2 py-1 border rounded"
-                                    />
-                                ) : (
-                                    band.name
-                                )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {band.averageScore ? band.averageScore.toFixed(2) : "-"}
-                            </td>
-                        </tr>
-                    ))}
+                    {votes.map((vote, voteIndex) => {
+                        const scores = bands.map((band) => {
+                            const score = vote.scores.find((s) => s.bandId === band.id);
+                            return score ? score.score : 0;
+                        });
+                        const bandIds = bands.map((band) => band.id);
+                        const variable = calculateVariable(scores, vote.voterBandId, bandIds);
+
+                        return (
+                            <tr key={voteIndex}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {vote.userName || `投票者${voteIndex + 1}`}
+                                </td>
+                                {scores.map((score, index) => (
+                                    <td
+                                        key={index}
+                                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                    >
+                                        {score}
+                                    </td>
+                                ))}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {variable.toFixed(6)}　{/* ここを toFixed(6) に変更 */}
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
