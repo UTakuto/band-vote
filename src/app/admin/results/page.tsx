@@ -166,12 +166,15 @@ export default function ResultsPage() {
                     </div>
 
                     {/* 集計結果テーブル */}
-                    <BandTable
-                        bands={bands}
-                        votes={votes}
-                        isEditing={isEditing}
-                        setBands={setBands}
-                    />
+                    <div>
+                        <h2 className="text-xl font-bold mb-4">バンド別集計</h2>
+                        <BandTable
+                            bands={bands}
+                            votes={votes}
+                            isEditing={isEditing}
+                            setBands={setBands}
+                        />
+                    </div>
 
                     {/* 操作パネル */}
                     <div className="mt-8 space-y-4">
