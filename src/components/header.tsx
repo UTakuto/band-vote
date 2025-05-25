@@ -36,6 +36,16 @@ export default function Header() {
                             >
                                 投票履歴
                             </Link>
+                            <Link
+                                href="/admin/personal"
+                                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                                    isActive("/admin/personal")
+                                        ? "bg-gray-900 text-[#fefefe]"
+                                        : "text-gray-300 hover:bg-gray-700 hover:text-[#fefefe]"
+                                }`}
+                            >
+                                個人票
+                            </Link>
                         </nav>
                     </div>
                 </div>
