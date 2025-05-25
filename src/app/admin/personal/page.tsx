@@ -51,7 +51,7 @@ export default function PersonalVotesPage() {
             <Header />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-white rounded-lg shadow-lg p-6">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-6">個人票一覧</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-6">個人補正値</h1>
                     {isLoading ? (
                         <Loading />
                     ) : (

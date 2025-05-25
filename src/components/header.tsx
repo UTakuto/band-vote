@@ -44,7 +44,7 @@ export default function Header() {
                                         : "text-gray-300 hover:bg-gray-700 hover:text-[#fefefe]"
                                 }`}
                             >
-                                個人票
+                                個人補正値
                             </Link>
                         </nav>
                     </div>
