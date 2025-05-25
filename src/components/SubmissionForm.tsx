@@ -75,7 +75,7 @@ export default function SubmissionForm() {
         try {
             const formData = {
                 name: userName,
-                band: Object.entries(selectedBands).find(([, isSelected]) => isSelected)?.[0] || "",
+                band: Object.entries(selectedBands).find(([, isSelected]) => isSelected)?.[0] || "", // 空文字列を許容
                 scores: Object.entries(scores)
                     .filter(([, score]) => score > 0)
                     .map(([bandId, score]) => ({
@@ -85,8 +85,6 @@ export default function SubmissionForm() {
             };
 
             await submitHandler(e, formData, setError, router, bands);
-            // 投票成功後に完了ページへリダイレクト
-            router.push("/vote-complete");
         } catch (err) {
             console.error("投票エラー:", err);
             setError("投票に失敗しました。時間をおいて再度お試しください。");
