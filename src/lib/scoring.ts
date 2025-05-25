@@ -1,40 +1,77 @@
-// ③と④: 個人ごとの平均点を計算し、変数を求める
-export const calculateVariable = (scores: number[], excludeIndex: number): number => {
-    // 自分の出演バンドのスコアを除外
-    const filteredScores = scores.filter((_, index) => index !== excludeIndex);
-    const average = filteredScores.reduce((sum, score) => sum + score, 0) / filteredScores.length;
+// 個人の平均点計算
+
+export const calculateVariable = (
+    scores: number[],
+    voterBandId: string,
+    bandIds: string[]
+): number => {
+    const modifiedScores = scores.map((score, index) =>
+        bandIds[index] === voterBandId ? 0 : score
+    );
+
+    const nonZeroScores = modifiedScores.filter((score) => score !== 0);
+    if (nonZeroScores.length === 0) return 1;
+
+    const average = nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length;
     return 5 / average;
 };
+// export const calculateVariable = (scores: number[], excludeIndex: number): number => {
+//     console.log("===== 個人の点数計算 =====");
+//     console.log("元のスコア:", scores);
 
-// ⑤: 個人がつけたそれぞれのバンド点数に変数をかける
-export const adjustScores = (scores: number[], variable: number): number[] => {
-    return scores.map((score) => score * variable);
-};
+//     // 自分の出演バンドのスコアを0点にする
+//     const modifiedScores = scores.map((score, index) => (index === excludeIndex ? 0 : score));
+//     console.log("自分のバンドを0点に修正:", modifiedScores);
 
-// ⑥と⑦: バンドごとに修正後平均点を合計し、平均点を計算する
-export const calculateBandScores = (allScores: number[][]): number[] => {
-    const bandScores = allScores[0].map((_, bandIndex) => {
-        const total = allScores.reduce((sum, scores) => sum + scores[bandIndex], 0);
-        return total / allScores.length;
-    });
-    return bandScores;
-};
+//     // 0点を除外して平均を計算
+//     const nonZeroScores = modifiedScores.filter((score) => score !== 0);
+//     console.log("0点を除外したスコア:", nonZeroScores);
 
-// ⑧: 順位を計算する
-export const calculateRank = (bandScores: number[]): number[] => {
-    const sortedScores = [...bandScores].sort((a, b) => b - a);
-    return bandScores.map((score) => sortedScores.indexOf(score) + 1);
-};
+//     const average = nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length;
+//     console.log("個人の平均点:", average);
 
-// const scores = [4, 5, 3, 4]; // 個人がつけたスコア
-// const excludeIndex = 1; // 自分の出演バンドのインデックス
-// const variable = calculateVariable(scores, excludeIndex);
+//     const variable = 5 / average;
+//     console.log("個人の補正値:", variable);
+//     console.log("========================");
 
-// const adjustedScores = adjustScores(scores, variable);
+//     return variable;
+// };
 
-// const allScores = [
-//     [4, 5, 3, 4], // 個人1のスコア
-//     [3, 4, 5, 2], // 個人2のスコア
-//     [5, 3, 4, 5], // 個人3のスコア
-// ];
-// const bandScores = calculateBandScores(allScores);
+// // バンドごとの平均点を計算する関数
+// export const calculateBandScores = (allScores: number[][]): number[] => {
+//     console.log("===== バンドの平均点計算 =====");
+//     console.log("入力された全スコア:", allScores);
+
+//     const bandScores = allScores[0].map((_, bandIndex) => {
+//         // そのバンドの全スコアを取得
+//         const bandScores = allScores.map((scores) => scores[bandIndex]);
+//         console.log(`バンド${bandIndex + 1}の集計:`);
+//         console.log(`- 全スコア:`, bandScores);
+
+//         // 平均を計算
+//         const total = bandScores.reduce((sum, score) => sum + score, 0);
+//         const average = total / bandScores.length;
+//         console.log(`- 平均点: ${average.toFixed(2)}`);
+
+//         return average;
+//     });
+
+//     console.log(
+//         "全バンドの最終スコア:",
+//         bandScores.map((score) => score.toFixed(2))
+//     );
+//     console.log("============================");
+//     return bandScores;
+// };
+
+// // 順位を計算する関数
+// export const calculateRank = (bandScores: number[]): number[] => {
+//     console.log("===== 順位計算 =====");
+//     const ranks = bandScores.map((score) => {
+//         const rank = bandScores.filter((s) => s > score).length + 1;
+//         return rank;
+//     });
+//     console.log("順位結果:", ranks);
+//     console.log("===================");
+//     return ranks;
+// };
