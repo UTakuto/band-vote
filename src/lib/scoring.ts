@@ -1,3 +1,12 @@
+import { Band, Vote } from "@/types/types";
+
+type AdjustedVote = {
+    voterId: string;
+    voterName: string;
+    variable: number;
+    adjustedScores: number[];
+    originalScores: number[];
+};
 // 個人の平均点計算
 
 export const calculateVariable = (
@@ -15,63 +24,109 @@ export const calculateVariable = (
     const average = nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length;
     return 5 / average;
 };
-// export const calculateVariable = (scores: number[], excludeIndex: number): number => {
-//     console.log("===== 個人の点数計算 =====");
-//     console.log("元のスコア:", scores);
+/**
+ * ステップ3〜5：補正値と修正後スコアを全員分返す
+ */
+export const calculateAdjustedScores = (votes: Vote[], bands: Band[]): AdjustedVote[] => {
+    return votes.map((vote) => {
+        const bandIds = bands.map((b) => b.id);
+        const voterBandIdList = vote.voterBandId
+            .split("、")
+            .flatMap((v) => v.split(","))
+            .map((id) => id.trim());
 
-//     // 自分の出演バンドのスコアを0点にする
-//     const modifiedScores = scores.map((score, index) => (index === excludeIndex ? 0 : score));
-//     console.log("自分のバンドを0点に修正:", modifiedScores);
+        const scores = bandIds.map((id) => {
+            const found = vote.scores.find((s) => s.bandId === id);
+            return found ? found.score : 0;
+        });
 
-//     // 0点を除外して平均を計算
-//     const nonZeroScores = modifiedScores.filter((score) => score !== 0);
-//     console.log("0点を除外したスコア:", nonZeroScores);
+        // ステップ3: 自分のバンド以外の平均点
+        const validScores = scores.filter(
+            (_, index) => !voterBandIdList.includes(bandIds[index]) && scores[index] !== 0
+        );
+        const avg =
+            validScores.length > 0
+                ? validScores.reduce((a, b) => a + b, 0) / validScores.length
+                : 1;
 
-//     const average = nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length;
-//     console.log("個人の平均点:", average);
+        // ステップ4: 変数（補正値）
+        const variable = 5 / avg;
 
-//     const variable = 5 / average;
-//     console.log("個人の補正値:", variable);
-//     console.log("========================");
+        // ステップ5: 修正後スコア
+        const adjustedScores = scores.map((s) => s * variable);
 
-//     return variable;
-// };
+        return {
+            voterId: vote.id,
+            voterName: vote.userName,
+            variable: parseFloat(variable.toFixed(4)),
+            adjustedScores: adjustedScores.map((v) => parseFloat(v.toFixed(6))),
+            originalScores: scores,
+        };
+    });
+};
 
-// // バンドごとの平均点を計算する関数
-// export const calculateBandScores = (allScores: number[][]): number[] => {
-//     console.log("===== バンドの平均点計算 =====");
-//     console.log("入力された全スコア:", allScores);
+// /**
+//  * ステップ6〜8：バンドごとの修正後スコア平均と順位を返す
+//  */
+// export const calculateBandAveragesAndRanks = (
+//     adjustedData: { adjustedScores: number[] }[],
+//     bands: Band[]
+// ) => {
+//     const numBands = bands.length;
+//     const bandTotals = Array(numBands).fill(0);
+//     const bandCounts = Array(numBands).fill(0);
 
-//     const bandScores = allScores[0].map((_, bandIndex) => {
-//         // そのバンドの全スコアを取得
-//         const bandScores = allScores.map((scores) => scores[bandIndex]);
-//         console.log(`バンド${bandIndex + 1}の集計:`);
-//         console.log(`- 全スコア:`, bandScores);
-
-//         // 平均を計算
-//         const total = bandScores.reduce((sum, score) => sum + score, 0);
-//         const average = total / bandScores.length;
-//         console.log(`- 平均点: ${average.toFixed(2)}`);
-
-//         return average;
+//     adjustedData.forEach(({ adjustedScores }) => {
+//         adjustedScores.forEach((score, i) => {
+//             bandTotals[i] += score;
+//             bandCounts[i] += 1;
+//         });
 //     });
 
-//     console.log(
-//         "全バンドの最終スコア:",
-//         bandScores.map((score) => score.toFixed(2))
-//     );
-//     console.log("============================");
-//     return bandScores;
-// };
+//     const bandAverages = bandTotals.map((sum, i) => (bandCounts[i] > 0 ? sum / bandCounts[i] : 0));
 
-// // 順位を計算する関数
-// export const calculateRank = (bandScores: number[]): number[] => {
-//     console.log("===== 順位計算 =====");
-//     const ranks = bandScores.map((score) => {
-//         const rank = bandScores.filter((s) => s > score).length + 1;
-//         return rank;
-//     });
-//     console.log("順位結果:", ranks);
-//     console.log("===================");
-//     return ranks;
+//     const ranked = bandAverages
+//         .map((avg, i) => ({
+//             bandId: bands[i].id,
+//             bandName: bands[i].name,
+//             average: parseFloat(avg.toFixed(4)),
+//         }))
+//         .sort((a, b) => b.average - a.average);
+
+//     const rankedWithOrder = ranked.map((entry, index) => ({
+//         ...entry,
+//         rank: index + 1,
+//     }));
+
+//     return rankedWithOrder;
 // };
+/**
+ * チーム（バンド）ごとの補正後スコア合計と平均点を返す（順位なし）
+ */
+export const calculateBandTotalAdjustedScores = (
+    adjustedData: { adjustedScores: number[] }[],
+    votes: Vote[],
+    bands: Band[]
+) => {
+    const numBands = bands.length;
+    const bandTotals = Array(numBands).fill(0);
+    const bandCounts = Array(numBands).fill(0);
+
+    adjustedData.forEach(({ adjustedScores }, voterIndex) => {
+        adjustedScores.forEach((score, i) => {
+            const vote = votes[voterIndex];
+            const originalScore = vote.scores.find((s) => s.bandId === bands[i].id)?.score;
+            if (originalScore !== undefined && originalScore > 0) {
+                bandTotals[i] += score;
+                bandCounts[i] += 1;
+            }
+        });
+    });
+
+    return bands.map((band, i) => ({
+        bandId: band.id,
+        bandName: band.name,
+        total: parseFloat(bandTotals[i].toFixed(6)),
+        average: bandCounts[i] > 0 ? parseFloat((bandTotals[i] / bandCounts[i]).toFixed(4)) : 0,
+    }));
+};
