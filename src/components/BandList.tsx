@@ -19,7 +19,7 @@ const BandList: React.FC<BandListProps> = ({
     const sortedBands = [...bands].sort((a, b) => {
         const dateA = new Date(a.createdAt);
         const dateB = new Date(b.createdAt);
-        return dateA.getTime() - dateB.getTime(); // 昇順（古い順）
+        return dateA.getTime() - dateB.getTime();
     });
 
     return (
