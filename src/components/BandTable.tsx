@@ -4,7 +4,14 @@ import { calculateAdjustedScores, calculateBandTotalAdjustedScores } from "@/lib
 
 const BandTable: React.FC<BandTableProps> = ({ bands, votes }) => {
     const [bandResults, setBandResults] = useState<
-        { bandId: string; bandName: string; total: number; average: number; variables: number[] }[]
+        {
+            bandId: string;
+            bandName: string;
+            total: number;
+            average: number;
+            variables: number[];
+            rank: number;
+        }[]
     >([]);
 
     useEffect(() => {
@@ -29,17 +36,26 @@ const BandTable: React.FC<BandTableProps> = ({ bands, votes }) => {
                 return {
                     ...bandStat,
                     variables,
+                    rank: 0, // 初期値として0を設定
                 };
             });
 
-            console.table(bandResultsWithVariables);
-            bandResultsWithVariables.forEach((band) => {
-                console.log(`--- ${band.bandName} ---`);
+            // 平均点で降順ソートしてランキングを付ける
+            const sortedResults = [...bandResultsWithVariables]
+                .sort((a, b) => b.average - a.average)
+                .map((result, index) => ({
+                    ...result,
+                    rank: index + 1,
+                }));
+
+            console.table(sortedResults);
+            sortedResults.forEach((band) => {
+                console.log(`--- ${band.bandName} (${band.rank}位) ---`);
                 console.log(`合計点: ${band.total}`);
                 console.log(`補正値数: ${band.variables.length}`);
                 console.log(`平均点: ${(band.total / band.variables.length).toFixed(4)}`);
             });
-            setBandResults(bandResultsWithVariables);
+            setBandResults(sortedResults);
         }
     }, [votes, bands]);
 
@@ -49,33 +65,27 @@ const BandTable: React.FC<BandTableProps> = ({ bands, votes }) => {
                 <thead className="bg-gray-50">
                     <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            順位
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             バンド名
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            補正後合計点
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             平均点
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            個別補正値（変数）
                         </th>
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {bandResults.map((band) => (
                         <tr key={band.bandId}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {band.rank}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {band.bandName}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {band.total.toFixed(6)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {band.average.toFixed(2)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {band.variables.join(", ")}
                             </td>
                         </tr>
                     ))}
