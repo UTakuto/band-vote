@@ -167,12 +167,15 @@ export default function ResultsPage() {
 
                     {/* 集計結果テーブル */}
                     <div>
-                        <h2 className="text-xl font-bold mb-4">バンド別集計</h2>
+                        <h2 className="text-xl font-bold mb-4">
+                            {isVotingOpen ? "バンド一覧" : "最終結果"}
+                        </h2>
                         <BandTable
                             bands={bands}
                             votes={votes}
                             isEditing={isEditing}
                             setBands={setBands}
+                            isVotingOpen={isVotingOpen}
                         />
                     </div>
 
