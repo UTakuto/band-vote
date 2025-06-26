@@ -23,7 +23,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
             {}
         );
         setScores(initialScores);
-    }, [bands, selectedBands]);
+    }, [bands, selectedBands, scores]);
 
     // selectedBandsが変更されたときにスコアをリセット
     useEffect(() => {
