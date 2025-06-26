@@ -22,7 +22,14 @@ export default function VotesPage() {
             const response = await fetch("/admin/api/votes");
             const data = await response.json();
             if (data.votes) {
-                setVotes(data.votes);
+                // 投票時刻でソート（新しい順）
+                const sortedVotes = [...data.votes].sort((a, b) => {
+                    // createdAtがstring型の場合はDate型に変換
+                    const dateA = new Date(a.createdAt);
+                    const dateB = new Date(b.createdAt);
+                    return dateB.getTime() - dateA.getTime(); // 降順（新しい順）
+                });
+                setVotes(sortedVotes);
             }
         } catch (error) {
             console.error("投票履歴の取得に失敗しました:", error);
