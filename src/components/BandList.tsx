@@ -1,6 +1,7 @@
 import React from "react";
 import BandCheckbox from "./BandCheckbox";
 import { Band } from "@/types/types";
+
 interface BandListProps {
     bands: Band[];
     selectedBands: { [key: string]: boolean };
@@ -14,6 +15,13 @@ const BandList: React.FC<BandListProps> = ({
     onCheckboxChange,
     checkboxName,
 }) => {
+    // バンドを作成順でソート
+    const sortedBands = [...bands].sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateA.getTime() - dateB.getTime(); // 昇順（古い順）
+    });
+
     return (
         <div className="w-[250px] sm:w-[350px] mb-5">
             <label
@@ -23,7 +31,7 @@ const BandList: React.FC<BandListProps> = ({
                 出演バンド
             </label>
             <div className="w-full flex flex-col items-center justify-center">
-                {bands.map((band) => (
+                {sortedBands.map((band) => (
                     <BandCheckbox
                         key={band.id}
                         id={band.id}
