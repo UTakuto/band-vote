@@ -1,14 +1,14 @@
 import { Vote } from "@/types/types";
+import { Timestamp } from "firebase/firestore";
 
 export default function VoteHistoryTable({ votes }: { votes: Vote[] }) {
-    const formatDate = (timestamp: { seconds: number; nanoseconds: number }) => {
-        return new Date(timestamp.seconds * 1000).toLocaleString("ja-JP", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
+    // formatDate関数の型定義を修正
+    const formatDate = (date: string | Date | Timestamp) => {
+        if (date instanceof Timestamp) {
+            return new Date(date.seconds * 1000).toLocaleString("ja-JP");
+        }
+        const d = typeof date === "string" ? new Date(date) : date;
+        return d.toLocaleString("ja-JP");
     };
 
     return (
