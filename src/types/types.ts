@@ -36,16 +36,15 @@ export interface Vote {
         bandName: string;
         score: number;
     }[];
-    createdAt: {
-        seconds: number;
-        nanoseconds: number;
-    };
+    createdAt: string | Date;
 }
 
-export interface BandScoreListProps {
+export interface BandTableProps {
     bands: Band[];
-    selectedBands: { [key: string]: boolean };
-    onScoresChange: (scores: { [key: string]: number }) => void;
+    votes: Vote[];
+    isEditing: boolean;
+    setBands: React.Dispatch<React.SetStateAction<Band[]>>;
+    isVotingOpen: boolean;
 }
 
 export interface BandTableProps {
