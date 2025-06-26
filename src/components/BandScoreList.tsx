@@ -3,16 +3,35 @@ import { useState, useEffect } from "react";
 import { BandScoreListProps } from "@/types/types";
 
 const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onScoresChange }) => {
-    // バンドIDをキーとしたスコアの状態管理
     const [scores, setScores] = useState<{ [key: string]: number }>({});
-    const maxScore = 10; // 最大スコアを定義
+    const maxScore = 10;
+
+    // バンドを作成順でソート
+    const sortedBands = [...bands].sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateA.getTime() - dateB.getTime(); // 昇順（古い順）
+    });
+
+    // selectedBandsが変更されたときにスコアをリセット
+    useEffect(() => {
+        setScores((prev) => {
+            const newScores = { ...prev };
+            Object.keys(selectedBands).forEach((bandId) => {
+                if (selectedBands[bandId]) {
+                    newScores[bandId] = 0;
+                }
+            });
+            return newScores;
+        });
+    }, [selectedBands]);
 
     // バンドリストが変更されたときにスコアを初期化
     useEffect(() => {
         const initialScores = bands.reduce(
             (acc, band) => ({
                 ...acc,
-                [band.id]: 0,
+                [band.id]: selectedBands[band.id] ? 0 : scores[band.id] || 0,
             }),
             {}
         );
@@ -20,7 +39,9 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
     }, [bands]);
 
     useEffect(() => {
-        onScoresChange(scores);
+        if (Object.keys(scores).length > 0) {
+            onScoresChange(scores);
+        }
     }, [scores, onScoresChange]);
 
     const handleIncrement = (bandId: string) => {
@@ -55,7 +76,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
                 バンドの点数を記入してください
             </label>
             <div className="pb-2 px-3 mt-1 p-2 border border-gray-300 rounded-md dark:text-[#212121] dark:bg-[#fefefe]">
-                {bands.map((band) => (
+                {sortedBands.map((band) => (
                     <div
                         key={band.id}
                         className={`w-full flex justify-between items-center gap-x-3 py-3 border-b border-gray-200 dark:border-gray-300 
