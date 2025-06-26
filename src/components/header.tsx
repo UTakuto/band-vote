@@ -46,6 +46,16 @@ export default function Header() {
                             >
                                 個人補正値
                             </Link>
+                            <Link
+                                href="/admin/teams"
+                                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                                    isActive("/admin/teams")
+                                        ? "bg-gray-900 text-[#fefefe]"
+                                        : "text-gray-300 hover:bg-gray-700 hover:text-[#fefefe]"
+                                }`}
+                            >
+                                チーム補正値
+                            </Link>
                         </nav>
                     </div>
                 </div>
