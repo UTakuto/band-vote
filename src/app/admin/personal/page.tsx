@@ -11,12 +11,25 @@ export default function PersonalVotesPage() {
     const [votes, setVotes] = useState<Vote[]>([]);
     const [bands, setBands] = useState<Band[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isVotingOpen, setIsVotingOpen] = useState(true);
 
     useEffect(() => {
         if (isAdmin) {
             fetchData();
+            fetchVotingStatus();
         }
     }, [isAdmin]);
+
+    // 投票状態を取得する関数を追加
+    const fetchVotingStatus = async () => {
+        try {
+            const response = await fetch("/admin/api/voting-status");
+            const data = await response.json();
+            setIsVotingOpen(data.isOpen);
+        } catch (error) {
+            console.error("投票状態の取得に失敗しました:", error);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -29,8 +42,24 @@ export default function PersonalVotesPage() {
             const votesData = await votesRes.json();
             const bandsData = await bandsRes.json();
 
-            if (votesData.votes) setVotes(votesData.votes);
-            if (bandsData.bands) setBands(bandsData.bands);
+            if (votesData.votes) {
+                // 投票を時系列順（新しい順）でソート
+                const sortedVotes = [...votesData.votes].sort((a, b) => {
+                    const dateA = new Date(a.createdAt);
+                    const dateB = new Date(b.createdAt);
+                    return dateB.getTime() - dateA.getTime(); // 降順（新しい順）
+                });
+                setVotes(sortedVotes);
+            }
+            if (bandsData.bands) {
+                // バンドを作成順でソート
+                const sortedBands = [...bandsData.bands].sort((a, b) => {
+                    const dateA = new Date(a.createdAt);
+                    const dateB = new Date(b.createdAt);
+                    return dateA.getTime() - dateB.getTime(); // 昇順（古い順）
+                });
+                setBands(sortedBands);
+            }
         } catch (error) {
             console.error("データの取得に失敗しました:", error);
         } finally {
@@ -59,7 +88,8 @@ export default function PersonalVotesPage() {
                             bands={bands}
                             votes={votes}
                             isEditing={false}
-                            setBands={() => {}}
+                            setBands={setBands}
+                            isVotingOpen={isVotingOpen}
                         />
                     )}
                 </div>
