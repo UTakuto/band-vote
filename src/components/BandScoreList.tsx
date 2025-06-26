@@ -10,21 +10,8 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
     const sortedBands = [...bands].sort((a, b) => {
         const dateA = new Date(a.createdAt);
         const dateB = new Date(b.createdAt);
-        return dateA.getTime() - dateB.getTime(); // 昇順（古い順）
+        return dateA.getTime() - dateB.getTime();
     });
-
-    // selectedBandsが変更されたときにスコアをリセット
-    useEffect(() => {
-        setScores((prev) => {
-            const newScores = { ...prev };
-            Object.keys(selectedBands).forEach((bandId) => {
-                if (selectedBands[bandId]) {
-                    newScores[bandId] = 0;
-                }
-            });
-            return newScores;
-        });
-    }, [selectedBands]);
 
     // バンドリストが変更されたときにスコアを初期化
     useEffect(() => {
@@ -36,7 +23,21 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
             {}
         );
         setScores(initialScores);
-    }, [bands]);
+    }, [bands, selectedBands]);
+
+    // selectedBandsが変更されたときにスコアをリセット
+    useEffect(() => {
+        setScores((prev) => {
+            const newScores = { ...prev };
+            // 選択されたバンドのスコアを0にリセット
+            Object.entries(selectedBands).forEach(([bandId, isSelected]) => {
+                if (isSelected) {
+                    newScores[bandId] = 0;
+                }
+            });
+            return newScores;
+        });
+    }, [selectedBands]);
 
     useEffect(() => {
         if (Object.keys(scores).length > 0) {
