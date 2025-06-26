@@ -138,6 +138,13 @@ export default function ResultsPage() {
         }
     };
 
+    const handleAddBand = async (newBand: Band) => {
+        // バンドを追加
+        setBands((prevBands) => [...prevBands, newBand]);
+        // バンド一覧を再取得
+        await fetchBands();
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
             <Header />
@@ -186,13 +193,7 @@ export default function ResultsPage() {
                                 <div className="flex justify-center items-center space-x-4">
                                     {/* バンド登録フォーム */}
                                     <div className="flex justify-center items-center space-x-4">
-                                        {showBandForm && (
-                                            <BandForm
-                                                addBand={(newBand) =>
-                                                    setBands((prevBands) => [...prevBands, newBand])
-                                                }
-                                            />
-                                        )}
+                                        {showBandForm && <BandForm addBand={handleAddBand} />}
                                         <button
                                             onClick={() => setShowBandForm(!showBandForm)}
                                             className="w-[120px] sm:w-[180px] bg-gray-700 text-[#fefefe] py-2 rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"

@@ -1,5 +1,5 @@
-import { Vote } from "@/types/types";
 import { Timestamp } from "firebase/firestore";
+import { Vote } from "@/types/types";
 
 export default function VoteHistoryTable({ votes }: { votes: Vote[] }) {
     // formatDate関数の型定義を修正

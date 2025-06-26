@@ -11,53 +11,82 @@ const BandTable: React.FC<BandTableProps> = ({ bands, votes }) => {
             average: number;
             variables: number[];
             rank: number;
+            createdAt: string;
         }[]
     >([]);
 
     useEffect(() => {
-        if (votes.length > 0 && bands.length > 0) {
-            console.log("========== バンドごとの補正後スコア集計 ==========");
-            const adjusted = calculateAdjustedScores(votes, bands);
-            const bandStats = calculateBandTotalAdjustedScores(adjusted, votes, bands);
+        if (bands.length > 0) {
+            if (votes.length > 0) {
+                // 投票データがある場合は平均点で並び替え
+                console.log("========== バンドごとの補正後スコア集計 ==========");
+                const adjusted = calculateAdjustedScores(votes, bands);
+                const bandStats = calculateBandTotalAdjustedScores(adjusted, votes, bands);
 
-            // Add individual variables per band
-            const bandResultsWithVariables = bandStats.map((bandStat, bandIndex) => {
-                const variables = adjusted
-                    .map((adj, voterIndex) => {
-                        const vote = votes[voterIndex];
-                        const originalScore = vote.scores.find(
-                            (s) => s.bandId === bands[bandIndex].id
-                        )?.score;
-                        return originalScore !== undefined && originalScore > 0
-                            ? adj.variable
-                            : null;
+                const bandResultsWithVariables = bandStats
+                    .map((bandStat) => {
+                        const band = bands.find((b) => b.id === bandStat.bandId);
+                        if (!band) return null;
+
+                        const variables = votes
+                            .map((vote) => {
+                                const scoreObj = vote.scores.find((s) => s.bandId === band.id);
+                                return scoreObj && scoreObj.score > 0 ? scoreObj.score : null;
+                            })
+                            .filter((v): v is number => v !== null);
+
+                        return {
+                            bandId: band.id,
+                            bandName: band.name,
+                            total: bandStat.total,
+                            average: bandStat.average,
+                            variables,
+                            rank: 0,
+                            createdAt: band.createdAt.toString(),
+                        };
                     })
-                    .filter((v): v is number => v !== null);
-                return {
-                    ...bandStat,
-                    variables,
-                    rank: 0, // 初期値として0を設定
-                };
-            });
+                    .filter((result): result is NonNullable<typeof result> => result !== null);
 
-            // 平均点で降順ソートしてランキングを付ける
-            const sortedResults = [...bandResultsWithVariables]
-                .sort((a, b) => b.average - a.average)
-                .map((result, index) => ({
-                    ...result,
-                    rank: index + 1,
-                }));
+                // 平均点で並び替え
+                const sortedResults = [...bandResultsWithVariables]
+                    .sort((a, b) => b.average - a.average)
+                    .map((result, index) => ({
+                        ...result,
+                        rank: index + 1,
+                    }));
 
-            console.table(sortedResults);
-            sortedResults.forEach((band) => {
-                console.log(`--- ${band.bandName} (${band.rank}位) ---`);
-                console.log(`合計点: ${band.total}`);
-                console.log(`補正値数: ${band.variables.length}`);
-                console.log(`平均点: ${(band.total / band.variables.length).toFixed(4)}`);
-            });
-            setBandResults(sortedResults);
+                setBandResults(sortedResults);
+            } else {
+                // 投票データがない場合は作成順で並び替え
+                const initialResults = bands
+                    .sort((a, b) => {
+                        const dateA = new Date(a.createdAt);
+                        const dateB = new Date(b.createdAt);
+                        return dateA.getTime() - dateB.getTime();
+                    })
+                    .map((band, index) => ({
+                        bandId: band.id,
+                        bandName: band.name,
+                        total: 0,
+                        average: 0,
+                        variables: [],
+                        rank: index + 1,
+                        createdAt: band.createdAt.toString(),
+                    }));
+                setBandResults(initialResults);
+            }
         }
     }, [votes, bands]);
+
+    // 表示用のデータを作成
+    const displayResults =
+        votes.length > 0
+            ? [...bandResults].sort((a, b) => b.average - a.average)
+            : [...bandResults].sort((a, b) => {
+                  const dateA = new Date(a.createdAt);
+                  const dateB = new Date(b.createdAt);
+                  return dateA.getTime() - dateB.getTime();
+              });
 
     return (
         <div className="overflow-x-auto">
@@ -65,27 +94,27 @@ const BandTable: React.FC<BandTableProps> = ({ bands, votes }) => {
                 <thead className="bg-gray-50">
                     <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            順位
+                            {votes.length > 0 ? "順位" : "No."}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             バンド名
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            平均点
+                            {votes.length > 0 ? "平均点" : "仮順位"}
                         </th>
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {bandResults.map((band) => (
+                    {displayResults.map((band, index) => (
                         <tr key={band.bandId}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {band.rank}
+                                {votes.length > 0 ? band.rank : index + 1}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {band.bandName}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {band.average.toFixed(2)}
+                                {votes.length > 0 ? band.average.toFixed(2) : "-"}
                             </td>
                         </tr>
                     ))}
