@@ -9,9 +9,12 @@ interface BandFormProps {
 
 const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
     const [name, setName] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isSubmitting) return;
 
         if (!name.trim()) {
             alert("バンド名を入力してください");
@@ -19,6 +22,7 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
         }
 
         try {
+            setIsSubmitting(true);
             const bandsRef = collection(db, "bands");
             const newBand = {
                 name: name.trim(),
@@ -35,8 +39,10 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
             addBand({ ...newBand, id: docRef.id });
             setName("");
         } catch (error) {
-            console.log(error);
-            alert("バンドの追加に失敗しました。");
+            console.error("Error adding band:", error);
+            alert(`バンドの追加に失敗しました。エラー: ${error}`);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -47,14 +53,16 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="バンド名"
-                className="border rounded h-[40px]"
+                className="border rounded h-[40px] px-3 w-[200px]"
                 required
+                disabled={isSubmitting}
             />
             <button
                 type="submit"
-                className="w-[60px] h-[40px] bg-gray-700 text-[#fefefe] rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
+                className="w-[60px] h-[40px] bg-gray-700 text-[#fefefe] rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
             >
-                登録
+                {isSubmitting ? "..." : "登録"}
             </button>
         </form>
     );
