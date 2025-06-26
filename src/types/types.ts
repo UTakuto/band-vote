@@ -14,6 +14,7 @@ export interface Band {
     rank: number;
     totalAdjustedScore?: number; // オプショナルとして追加
     order?: number;
+    createdAt: string | Date; // ISO 8601形式の文字列またはDate型
 }
 export interface Score {
     band: string;
@@ -47,9 +48,8 @@ export interface BandTableProps {
     isVotingOpen: boolean;
 }
 
-export interface BandTableProps {
+export interface BandScoreListProps {
     bands: Band[];
-    votes: Vote[];
-    isEditing: boolean;
-    setBands: React.Dispatch<React.SetStateAction<Band[]>>;
+    selectedBands: { [key: string]: boolean };
+    onScoresChange: (scores: { [key: string]: number }) => void;
 }
