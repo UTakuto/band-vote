@@ -18,18 +18,17 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
         const initialScores = bands.reduce(
             (acc, band) => ({
                 ...acc,
-                [band.id]: selectedBands[band.id] ? 0 : scores[band.id] || 0,
+                [band.id]: selectedBands[band.id] ? 0 : 0, // 初期値は常に0
             }),
             {}
         );
         setScores(initialScores);
-    }, [bands, selectedBands, scores]);
+    }, [bands, selectedBands]); // scoresを依存配列から削除
 
     // selectedBandsが変更されたときにスコアをリセット
     useEffect(() => {
         setScores((prev) => {
             const newScores = { ...prev };
-            // 選択されたバンドのスコアを0にリセット
             Object.entries(selectedBands).forEach(([bandId, isSelected]) => {
                 if (isSelected) {
                     newScores[bandId] = 0;
@@ -38,6 +37,13 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
             return newScores;
         });
     }, [selectedBands]);
+
+    // スコアが変更されたときに親コンポーネントに通知
+    useEffect(() => {
+        if (Object.keys(scores).length > 0) {
+            onScoresChange(scores);
+        }
+    }, [scores, onScoresChange]);
 
     useEffect(() => {
         if (Object.keys(scores).length > 0) {
