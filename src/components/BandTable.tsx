@@ -114,7 +114,7 @@ const BandTable: React.FC<BandTableProps> = ({ bands, votes }) => {
                                 {band.bandName}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {votes.length > 0 ? band.average.toFixed(2) : "-"}
+                                {votes.length > 0 ? band.average.toFixed(3) : "-"}
                             </td>
                         </tr>
                     ))}
