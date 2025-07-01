@@ -7,6 +7,15 @@ import BandScoreList from "./BandScoreList";
 import { Band } from "@/types/types";
 import { handleSubmit as submitHandler } from "@/utils/handleSubmits";
 
+// Window オブジェクトの拡張
+declare global {
+    interface Window {
+        validateBandScores?: () => boolean;
+        resetBandScores?: () => void;
+        isBandScoresValid?: () => boolean;
+    }
+}
+
 export default function SubmissionForm() {
     const router = useRouter();
     const [userName, setUserName] = useState("");
@@ -16,6 +25,7 @@ export default function SubmissionForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [isVotingOpen, setIsVotingOpen] = useState(true);
+    const [isFormValid, setIsFormValid] = useState(false);
 
     useEffect(() => {
         const checkVotingStatus = async () => {
@@ -54,6 +64,23 @@ export default function SubmissionForm() {
         fetchBands();
     }, []);
 
+    // フォームの有効性をチェック
+    useEffect(() => {
+        const checkFormValidity = () => {
+            const isNameValid = userName.trim().length > 0;
+            const isBandScoresValid =
+                typeof window.isBandScoresValid === "function" ? window.isBandScoresValid() : false;
+            setIsFormValid(isNameValid && isBandScoresValid);
+        };
+
+        // バンドが読み込まれてからチェックを実行
+        if (bands.length > 0) {
+            // 少し遅延を入れてwindowオブジェクトの関数が確実に設定されるのを待つ
+            const timer = setTimeout(checkFormValidity, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [userName, scores, selectedBands, bands]);
+
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, checked } = event.target;
         setSelectedBands((prevSelectedBands) => ({
@@ -67,6 +94,16 @@ export default function SubmissionForm() {
 
         if (!isVotingOpen) {
             alert("投票時間が終了しました。");
+            return;
+        }
+
+        // バリデーション関数を直接呼び出して最終確認
+        const isNameValid = userName.trim().length > 0;
+        const isBandScoresValid =
+            typeof window.validateBandScores === "function" ? window.validateBandScores() : false;
+
+        if (!isNameValid || !isBandScoresValid) {
+            alert("入力内容に不備があります。エラーメッセージを確認してください。");
             return;
         }
 
@@ -121,13 +158,23 @@ export default function SubmissionForm() {
 
                 <button
                     type="submit"
-                    disabled={isSubmitting || !isVotingOpen}
-                    className="w-[120px] sm:w-[180px] bg-gray-700 text-[#fefefe] py-2 rounded-md 
-                        transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg mt-4
-                        disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isSubmitting || !isVotingOpen || !isFormValid}
+                    className={`w-[120px] sm:w-[180px] py-2 rounded-md transition-all duration-300 ease-in-out transform mt-4
+                        ${
+                            isFormValid && !isSubmitting && isVotingOpen
+                                ? "bg-gray-700 text-[#fefefe] hover:bg-gray-600 hover:shadow-lg"
+                                : "bg-gray-400 text-gray-600 cursor-not-allowed"
+                        }
+                        disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                     {isSubmitting ? "投票中..." : "投票"}
                 </button>
+
+                {!isFormValid && (
+                    <p className="text-red-500 text-sm mt-2 text-center">
+                        すべての項目を正しく入力してください
+                    </p>
+                )}
             </form>
         </div>
     );
