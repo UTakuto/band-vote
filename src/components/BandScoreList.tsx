@@ -24,17 +24,32 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
         const dateB = new Date(b.createdAt);
         return dateA.getTime() - dateB.getTime();
     });
+    // selectedBandsの変更を監視し、選択されたバンドのスコアを0にする
+    useEffect(() => {
+        const updatedScores = { ...scores };
+        Object.entries(selectedBands).forEach(([bandId, isSelected]) => {
+            if (isSelected) {
+                updatedScores[bandId] = 0;
+                setInputValues((prev) => ({
+                    ...prev,
+                    [bandId]: "0",
+                }));
+            }
+        });
+        setScores(updatedScores);
+        onScoresChange(updatedScores);
+    }, [selectedBands]);
 
     // バリデーション関数
     const validateAllScores = () => {
-        // 出演していないバンドのみをチェック対象にし、0点のものをエラーとする
+        // 出演していないバンドのみをチェック対象にし、1点未満のものをエラーとする
         const nonPerformingBands = sortedBands.filter((band) => !selectedBands[band.id]);
-        const zeroScoreBands = nonPerformingBands.filter((band) => (scores[band.id] || 0) === 0);
-        const valid = zeroScoreBands.length === 0;
+        const invalidScoreBands = nonPerformingBands.filter((band) => (scores[band.id] || 0) < 1);
+        const valid = invalidScoreBands.length === 0;
 
-        if (zeroScoreBands.length > 0) {
+        if (invalidScoreBands.length > 0) {
             setErrorMessage(
-                `${zeroScoreBands
+                `${invalidScoreBands
                     .map((band) => band.name)
                     .join(", ")} の点数を入力してください（1-${maxScore}点）`
             );
