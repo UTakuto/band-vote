@@ -23,6 +23,12 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
 
         try {
             setIsSubmitting(true);
+            console.log("Firebase config:", {
+                apiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+                authDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+                projectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+            });
+            
             const bandsRef = collection(db, "bands");
             const newBand = {
                 name: name.trim(),
@@ -33,6 +39,8 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
             };
 
             console.log("Adding new band:", newBand);
+            console.log("Database instance:", !!db);
+            
             const docRef = await addDoc(bandsRef, newBand);
             console.log("Document written with ID:", docRef.id);
 
@@ -40,7 +48,12 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
             setName("");
         } catch (error) {
             console.error("Error adding band:", error);
-            alert(`バンドの追加に失敗しました。エラー: ${error}`);
+            console.error("Error details:", {
+                message: error instanceof Error ? error.message : String(error),
+                code: error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined,
+                stack: error instanceof Error ? error.stack : undefined,
+            });
+            alert(`バンドの追加に失敗しました。エラー: ${error instanceof Error ? error.message : String(error)}`);
         } finally {
             setIsSubmitting(false);
         }
