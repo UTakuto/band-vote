@@ -6,13 +6,14 @@ import { Band, Vote } from "@/types/types";
 import Header from "@/components/header";
 import { useAdmin } from "@/hooks/useAdmin";
 import Loading from "@/components/Loading";
+import Link from "next/link";
 
 export default function ResultsPage() {
     const { isAdmin, loading } = useAdmin();
     const [isVotingOpen, setIsVotingOpen] = useState(true);
     const [bands, setBands] = useState<Band[]>([]);
     const [votes, setVotes] = useState<Vote[]>([]);
-    const [isEditing, setIsEditing] = useState(false);
+    // const [isEditing, setIsEditing] = useState(false);
     const [showBandForm, setShowBandForm] = useState(false);
 
     useEffect(() => {
@@ -39,20 +40,20 @@ export default function ResultsPage() {
         }
     };
 
-    const handleBandUpdate = async () => {
-        const response = await fetch("/admin/api/bands", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ bands }),
-        });
+    // const handleBandUpdate = async () => {
+    //     const response = await fetch("/admin/api/bands", {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //         },
+    //         body: JSON.stringify({ bands }),
+    //     });
 
-        if (response.ok) {
-            setIsEditing(false);
-            await fetchBands();
-        }
-    };
+    //     if (response.ok) {
+    //         setIsEditing(false);
+    //         await fetchBands();
+    //     }
+    // };
 
     const fetchVotes = async () => {
         try {
@@ -153,6 +154,12 @@ export default function ResultsPage() {
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-2xl font-bold text-gray-900">採点結果管理画面</h1>
                         <div className="flex justify-center items-center space-x-4">
+                            <Link
+                                href="/admin/bandedit"
+                                className="px-4 py-2 bg-gray-600 text-[#fefefe] rounded-md hover:bg-gray-700"
+                            >
+                                バンド情報編集
+                            </Link>
                             <button
                                 onClick={handleVotingStatusChange}
                                 className={`px-4 py-2 rounded-md text-sm font-medium ${
@@ -180,7 +187,7 @@ export default function ResultsPage() {
                         <BandTable
                             bands={bands}
                             votes={votes}
-                            isEditing={isEditing}
+                            isEditing={false} // 編集モードは無効化
                             setBands={setBands}
                             isVotingOpen={isVotingOpen}
                         />
@@ -201,29 +208,6 @@ export default function ResultsPage() {
                                             {showBandForm ? "フォームを閉じる" : "バンドを追加"}
                                         </button>
                                     </div>
-                                    {isEditing ? (
-                                        <>
-                                            <button
-                                                onClick={handleBandUpdate}
-                                                className="mr-2 px-4 py-2 bg-green-600 text-[#fefefe] rounded-md text-sm font-medium hover:bg-green-700"
-                                            >
-                                                保存
-                                            </button>
-                                            <button
-                                                onClick={() => setIsEditing(false)}
-                                                className="mr-2 px-4 py-2 bg-gray-600 text-[#fefefe] rounded-md text-sm font-medium hover:bg-gray-700"
-                                            >
-                                                キャンセル
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            onClick={() => setIsEditing(true)}
-                                            className="w-[120px] sm:w-[180px] h-[40px] bg-gray-700 text-[#fefefe] rounded-md transition-all duration-300 ease-in-out transform hover:bg-gray-600 hover:shadow-lg"
-                                        >
-                                            バンド情報編集
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         </div>
