@@ -26,19 +26,28 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
     });
     // selectedBandsの変更を監視し、選択されたバンドのスコアを0にする
     useEffect(() => {
-        const updatedScores = { ...scores };
-        Object.entries(selectedBands).forEach(([bandId, isSelected]) => {
-            if (isSelected) {
-                updatedScores[bandId] = 0;
-                setInputValues((prev) => ({
-                    ...prev,
-                    [bandId]: "0",
-                }));
+        setScores((prevScores) => {
+            const updatedScores = { ...prevScores };
+            let hasChanges = false;
+
+            Object.entries(selectedBands).forEach(([bandId, isSelected]) => {
+                if (isSelected && updatedScores[bandId] !== 0) {
+                    updatedScores[bandId] = 0;
+                    hasChanges = true;
+                    setInputValues((prev) => ({
+                        ...prev,
+                        [bandId]: "0",
+                    }));
+                }
+            });
+
+            if (hasChanges) {
+                onScoresChange(updatedScores);
+                return updatedScores;
             }
+            return prevScores;
         });
-        setScores(updatedScores);
-        onScoresChange(updatedScores);
-    }, [selectedBands, scores, onScoresChange]);
+    }, [selectedBands, onScoresChange]);
 
     // バリデーション関数
     const validateAllScores = useCallback(() => {
@@ -63,23 +72,29 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
 
     // バンドリストが変更されたときにスコアを初期化（初回のみ）
     useEffect(() => {
-        const initialScores = bands.reduce(
-            (acc, band) => ({
-                ...acc,
-                [band.id]: scores[band.id] !== undefined ? scores[band.id] : 0, // 既存の点数を保持
-            }),
-            {}
-        );
-        const initialInputValues = bands.reduce(
-            (acc, band) => ({
-                ...acc,
-                [band.id]: inputValues[band.id] !== undefined ? inputValues[band.id] : "",
-            }),
-            {}
-        );
-        setScores(initialScores);
-        setInputValues(initialInputValues);
-    }, [bands, scores, inputValues]);
+        setScores((prevScores) => {
+            const initialScores = bands.reduce(
+                (acc, band) => ({
+                    ...acc,
+                    [band.id]: prevScores[band.id] !== undefined ? prevScores[band.id] : 0,
+                }),
+                {}
+            );
+            return initialScores;
+        });
+
+        setInputValues((prevInputValues) => {
+            const initialInputValues = bands.reduce(
+                (acc, band) => ({
+                    ...acc,
+                    [band.id]:
+                        prevInputValues[band.id] !== undefined ? prevInputValues[band.id] : "",
+                }),
+                {}
+            );
+            return initialInputValues;
+        });
+    }, [bands]);
 
     // スコアまたは選択状態が変更されたときにバリデーションを実行
     useEffect(() => {
@@ -367,8 +382,8 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
                                     className="w-full h-2 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                                     style={{
                                         background: `linear-gradient(to right, #3b82f6 ${
-                                            (scores[band.id] || 0) * 10
-                                        }%, #d1d5db ${(scores[band.id] || 0) * 10}%)`,
+                                            ((scores[band.id] || 0) / maxScore) * 100
+                                        }%, #d1d5db ${((scores[band.id] || 0) / maxScore) * 100}%)`,
                                     }}
                                 />
                             </div>
