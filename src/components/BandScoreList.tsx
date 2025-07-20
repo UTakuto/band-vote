@@ -160,10 +160,23 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
     const handleDecrement = (bandId: string) => {
         if (selectedBands[bandId]) return;
         setScores((prev) => {
-            const newScore = Math.max((prev[bandId] || 0) - 1, 0);
+            const currentScore = prev[bandId] || 0;
+            if (currentScore <= 1) {
+                // 1点以下の場合は0に戻す
+                const newScore = 0;
+                setInputValues((prevInput) => ({
+                    ...prevInput,
+                    [bandId]: "",
+                }));
+                return {
+                    ...prev,
+                    [bandId]: newScore,
+                };
+            }
+            const newScore = currentScore - 1;
             setInputValues((prevInput) => ({
                 ...prevInput,
-                [bandId]: newScore === 0 ? "" : newScore.toString(),
+                [bandId]: newScore.toString(),
             }));
             return {
                 ...prev,
@@ -275,7 +288,9 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
                                         type="button"
                                         className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none dark:border-gray-300"
                                         onClick={() => handleDecrement(band.id)}
-                                        disabled={selectedBands[band.id]}
+                                        disabled={
+                                            selectedBands[band.id] || (scores[band.id] || 0) <= 0
+                                        }
                                         aria-label="Decrease"
                                     >
                                         <svg
@@ -315,7 +330,10 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
                                         type="button"
                                         className="size-6 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-md border border-gray-200 bg-[#fefefe] text-gray-800 shadow-sm disabled:opacity-50 disabled:pointer-events-none dark:border-gray-300"
                                         onClick={() => handleIncrement(band.id)}
-                                        disabled={selectedBands[band.id]}
+                                        disabled={
+                                            selectedBands[band.id] ||
+                                            (scores[band.id] || 0) >= maxScore
+                                        }
                                         aria-label="Increase"
                                     >
                                         <svg

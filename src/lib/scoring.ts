@@ -22,7 +22,7 @@ export const calculateVariable = (
     if (nonZeroScores.length === 0) return 1;
 
     const average = nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length;
-    return 5 / average;
+    return 5.5 / average; // 10点満点の中央値5.5を基準にする
 };
 /**
  * ステップ3〜5：補正値と修正後スコアを全員分返す

@@ -38,7 +38,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const data = await request.json();
-        
+
         // 単一バンドの追加の場合
         if (data.name) {
             const newBand = {
@@ -52,15 +52,15 @@ export async function POST(request: Request) {
 
             const docRef = adminDb.collection("bands").doc();
             await docRef.set(newBand);
-            
+
             console.log("新しいバンドを追加しました:", { id: docRef.id, ...newBand });
-            
-            return NextResponse.json({ 
+
+            return NextResponse.json({
                 message: "バンドを追加しました",
-                band: { id: docRef.id, ...newBand }
+                band: { id: docRef.id, ...newBand },
             });
         }
-        
+
         // 複数バンドのバッチ更新の場合
         if (data.bands && Array.isArray(data.bands)) {
             const batch = adminDb.batch();
