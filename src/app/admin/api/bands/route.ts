@@ -38,17 +38,45 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const data = await request.json();
-        const batch = adminDb.batch();
+        
+        // 単一バンドの追加の場合
+        if (data.name) {
+            const newBand = {
+                name: data.name,
+                score: 0,
+                averageScore: 0,
+                rank: 0,
+                order: data.order || 0,
+                createdAt: new Date().toISOString(),
+            };
 
-        data.bands.forEach((band: Band) => {
-            const docRef = adminDb.collection("bands").doc(band.id);
-            batch.set(docRef, band);
-        });
+            const docRef = adminDb.collection("bands").doc();
+            await docRef.set(newBand);
+            
+            console.log("新しいバンドを追加しました:", { id: docRef.id, ...newBand });
+            
+            return NextResponse.json({ 
+                message: "バンドを追加しました",
+                band: { id: docRef.id, ...newBand }
+            });
+        }
+        
+        // 複数バンドのバッチ更新の場合
+        if (data.bands && Array.isArray(data.bands)) {
+            const batch = adminDb.batch();
 
-        await batch.commit();
-        return NextResponse.json({ message: "バンド情報を更新しました" });
+            data.bands.forEach((band: Band) => {
+                const docRef = adminDb.collection("bands").doc(band.id);
+                batch.set(docRef, band);
+            });
+
+            await batch.commit();
+            return NextResponse.json({ message: "バンド情報を更新しました" });
+        }
+
+        return NextResponse.json({ error: "無効なリクエストデータです" }, { status: 400 });
     } catch (error) {
-        console.error("Error updating bands:", error);
-        return NextResponse.json({ error: "バンド情報の更新に失敗しました" }, { status: 500 });
+        console.error("Error processing bands:", error);
+        return NextResponse.json({ error: "バンド処理に失敗しました" }, { status: 500 });
     }
 }

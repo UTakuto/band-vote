@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { Band } from "@/types/types";
 
 interface BandFormProps {
@@ -28,32 +26,46 @@ const BandForm: React.FC<BandFormProps> = ({ addBand }) => {
                 authDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
                 projectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
             });
-            
-            const bandsRef = collection(db, "bands");
-            const newBand = {
-                name: name.trim(),
-                score: 0,
-                averageScore: 0,
-                rank: 0,
-                createdAt: new Date().toISOString(),
-            };
 
-            console.log("Adding new band:", newBand);
-            console.log("Database instance:", !!db);
-            
-            const docRef = await addDoc(bandsRef, newBand);
-            console.log("Document written with ID:", docRef.id);
+            // APIエンドポイント経由でバンドを追加
+            const response = await fetch('/admin/api/bands', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name.trim(),
+                    order: Date.now(), // 作成順序を保持
+                }),
+            });
 
-            addBand({ ...newBand, id: docRef.id });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'バンドの追加に失敗しました');
+            }
+
+            const result = await response.json();
+            console.log("Band added successfully:", result);
+
+            if (result.band) {
+                addBand(result.band);
+            }
             setName("");
         } catch (error) {
             console.error("Error adding band:", error);
             console.error("Error details:", {
                 message: error instanceof Error ? error.message : String(error),
-                code: error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined,
+                code:
+                    error && typeof error === "object" && "code" in error
+                        ? (error as { code: string }).code
+                        : undefined,
                 stack: error instanceof Error ? error.stack : undefined,
             });
-            alert(`バンドの追加に失敗しました。エラー: ${error instanceof Error ? error.message : String(error)}`);
+            alert(
+                `バンドの追加に失敗しました。エラー: ${
+                    error instanceof Error ? error.message : String(error)
+                }`
+            );
         } finally {
             setIsSubmitting(false);
         }
