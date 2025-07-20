@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { doc, deleteDoc, getDoc } from "firebase/firestore";
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const bandId = params.id;
+        const { id: bandId } = await params;
         console.log("削除リクエストを受信:", bandId);
 
         // バンドの存在確認

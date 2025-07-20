@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BandScoreListProps } from "@/types/types";
 
 // Window オブジェクトの拡張
@@ -38,10 +38,10 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
         });
         setScores(updatedScores);
         onScoresChange(updatedScores);
-    }, [selectedBands]);
+    }, [selectedBands, scores, onScoresChange]);
 
     // バリデーション関数
-    const validateAllScores = () => {
+    const validateAllScores = useCallback(() => {
         // 出演していないバンドのみをチェック対象にし、1点未満のものをエラーとする
         const nonPerformingBands = sortedBands.filter((band) => !selectedBands[band.id]);
         const invalidScoreBands = nonPerformingBands.filter((band) => (scores[band.id] || 0) < 1);
@@ -59,7 +59,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
 
         setIsValid(valid);
         return valid;
-    };
+    }, [sortedBands, selectedBands, scores, maxScore]);
 
     // バンドリストが変更されたときにスコアを初期化（初回のみ）
     useEffect(() => {
@@ -79,7 +79,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
         );
         setScores(initialScores);
         setInputValues(initialInputValues);
-    }, [bands]);
+    }, [bands, scores, inputValues]);
 
     // スコアまたは選択状態が変更されたときにバリデーションを実行
     useEffect(() => {
@@ -88,15 +88,15 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
             // 親コンポーネントにスコアのみを通知
             onScoresChange(scores);
         }
-    }, [scores, selectedBands, bands]);
+    }, [scores, selectedBands, bands, validateAllScores, onScoresChange]);
 
     // 投票ボタンが押された時に呼び出される関数（親コンポーネントから呼び出される）
-    const validateScores = () => {
+    const validateScores = useCallback(() => {
         return validateAllScores();
-    };
+    }, [validateAllScores]);
 
     // スコアリセット関数
-    const resetScores = () => {
+    const resetScores = useCallback(() => {
         const resetScores = bands.reduce(
             (acc, band) => ({
                 ...acc,
@@ -119,7 +119,7 @@ const BandScoreList: React.FC<BandScoreListProps> = ({ bands, selectedBands, onS
 
         // 親コンポーネントにリセットされたスコアを通知
         onScoresChange(resetScores);
-    };
+    }, [bands, onScoresChange]);
 
     // validateScores関数を親コンポーネントに公開するための ref
     useEffect(() => {
